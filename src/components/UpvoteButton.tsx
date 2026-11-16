@@ -83,15 +83,15 @@ export function UpvoteButton({
   };
 
   const sizeClasses = {
-    sm: 'text-xs py-1 px-2 gap-1',
-    md: 'text-sm py-1.5 px-3 gap-1.5',
-    lg: 'text-base py-2 px-4 gap-2 font-semibold',
+    sm: 'text-xs py-1 px-2.5 gap-1.5 rounded-lg',
+    md: 'text-xs font-bold py-2 px-3 gap-1.5 rounded-xl',
+    lg: 'text-sm font-bold py-2.5 px-4 gap-2 rounded-xl',
   }[size];
 
   const iconSizes = {
     sm: 'w-3.5 h-3.5',
     md: 'w-4 h-4',
-    lg: 'w-5 h-5',
+    lg: 'w-4.5 h-4.5',
   }[size];
 
   return (
@@ -99,18 +99,18 @@ export function UpvoteButton({
       onClick={handleToggle}
       disabled={loading}
       aria-label={hasUpvoted ? 'Remove upvote' : 'Upvote issue'}
-      className={`inline-flex items-center rounded-lg border transition-all duration-150 ${sizeClasses} ${
+      className={`inline-flex items-center justify-center border transition-all duration-200 cursor-pointer ${sizeClasses} ${
         hasUpvoted
-          ? 'bg-indigo-50 border-indigo-300 text-indigo-700 shadow-xs hover:bg-indigo-100'
-          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-2xs'
+          ? 'bg-teal-50 border-teal-300 text-[#0D9488] shadow-xs hover:bg-teal-100 hover:scale-105 active:scale-95'
+          : 'bg-white border-slate-200 text-slate-600 hover:border-teal-300 hover:bg-slate-50 hover:text-slate-900 shadow-2xs hover:scale-105 active:scale-95'
       }`}
     >
       <ThumbsUp
         className={`${iconSizes} transition-transform ${
-          hasUpvoted ? 'fill-indigo-600 text-indigo-600 scale-110' : 'text-slate-400 group-hover:text-slate-600'
+          hasUpvoted ? 'fill-[#0D9488] text-[#0D9488] scale-110' : 'text-slate-400 group-hover:text-slate-600'
         }`}
       />
-      <span className="font-semibold">{count}</span>
+      <span>{count}</span>
       <span className="sr-only">Upvotes</span>
     </button>
   );
