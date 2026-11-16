@@ -7,14 +7,20 @@ import { ShieldAlert, GraduationCap, School, Wrench, Sparkles, Loader2, ArrowRig
 
 interface Props {
   redirectTo?: string;
+  onSelectRole?: (demoEmail: string, demoPassword: string, demoRole: string) => void;
 }
 
-export function QuickDemoLogin({ redirectTo }: Props) {
+export function QuickDemoLogin({ redirectTo, onSelectRole }: Props) {
   const [loading, setLoading] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
 
   const handleDemoSignIn = async (email: string, role: string) => {
+    if (onSelectRole) {
+      onSelectRole(email, 'CampusFix2026!', role.toLowerCase());
+      return;
+    }
+
     setLoading(role);
     try {
       const { error } = await supabase.auth.signInWithPassword({
