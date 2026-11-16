@@ -20,9 +20,16 @@ export function ReadAloudButton() {
       setHasSelection(Boolean(text && text.length > 0));
     };
 
+    const handleHeaderTrigger = () => {
+      startReading();
+    };
+
     document.addEventListener('selectionchange', handleSelectionChange);
+    window.addEventListener('campusfix:read-aloud', handleHeaderTrigger);
+
     return () => {
       document.removeEventListener('selectionchange', handleSelectionChange);
+      window.removeEventListener('campusfix:read-aloud', handleHeaderTrigger);
       stopReading();
     };
   }, []);

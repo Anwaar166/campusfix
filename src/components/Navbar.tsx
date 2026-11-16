@@ -17,6 +17,8 @@ import {
   Building2,
   Sparkles,
   ArrowRight,
+  Eye,
+  Volume2,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { Profile } from '@/types/database';
@@ -103,6 +105,39 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
             >
               About
             </Link>
+
+            {/* Grouped Accessibility & Read Text Controls (Related Bordered Look) */}
+            <div className="flex items-center ml-1 border border-slate-300/80 rounded-xl bg-slate-50/90 p-0.5 shadow-2xs hover:border-teal-500/50 transition-colors">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('campusfix:open-a11y'));
+                  }
+                }}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:text-[#0D9488] hover:bg-white transition-all cursor-pointer"
+                title="Accessibility & Display Settings"
+                aria-label="Open Accessibility options"
+              >
+                <Eye className="w-3.5 h-3.5 text-[#0D9488]" />
+                <span>Accessibility</span>
+              </button>
+              <div className="w-px h-4 bg-slate-300" />
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('campusfix:read-aloud'));
+                  }
+                }}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:text-indigo-600 hover:bg-white transition-all cursor-pointer"
+                title="Read Highlighted Text Aloud"
+                aria-label="Read highlighted text aloud"
+              >
+                <Volume2 className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Read Text</span>
+              </button>
+            </div>
 
             {initialProfile && (
               <>
@@ -306,6 +341,37 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
           >
             About
           </Link>
+
+          {/* Mobile Grouped Accessibility & Read Text Controls (Related Bordered Look) */}
+          <div className="my-2 p-1 border border-slate-300/80 rounded-xl bg-slate-50 flex items-center justify-around shadow-2xs">
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(new CustomEvent('campusfix:open-a11y'));
+                }
+              }}
+              className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold text-slate-700 hover:text-[#0D9488] hover:bg-white transition-colors cursor-pointer"
+            >
+              <Eye className="w-4 h-4 text-[#0D9488]" />
+              <span>Accessibility</span>
+            </button>
+            <div className="w-px h-5 bg-slate-300" />
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(new CustomEvent('campusfix:read-aloud'));
+                }
+              }}
+              className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold text-slate-700 hover:text-indigo-600 hover:bg-white transition-colors cursor-pointer"
+            >
+              <Volume2 className="w-4 h-4 text-indigo-600" />
+              <span>Read Text</span>
+            </button>
+          </div>
 
           {initialProfile ? (
             <div className="pt-3 border-t border-slate-100 space-y-1">

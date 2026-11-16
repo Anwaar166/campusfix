@@ -15,6 +15,7 @@ import {
   BarChart3,
   Bot,
   Eye,
+  Volume2,
   User,
   Settings,
   LogOut,
@@ -174,8 +175,39 @@ export function DashboardSidebar({ profile, unreadCount = 0 }: Props) {
         )}
       </nav>
 
-      {/* Footer / Sign Out */}
-      <div className="p-3 border-t border-slate-800">
+      {/* Footer / Sign Out & Quick Accessibility */}
+      <div className="p-3 border-t border-slate-800 space-y-2">
+        {/* Grouped Accessibility & Read Text Controls (Related Bordered Look) */}
+        <div className="p-1 border border-slate-700/80 rounded-xl bg-slate-900/60 flex items-center justify-around text-xs">
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('campusfix:open-a11y'));
+              }
+            }}
+            className="flex items-center gap-1.5 py-1.5 px-2 rounded-lg text-slate-300 hover:text-teal-300 hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Accessibility Settings"
+          >
+            <Eye className="w-3.5 h-3.5 text-teal-400" />
+            <span>Accessibility</span>
+          </button>
+          <div className="w-px h-4 bg-slate-700" />
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('campusfix:read-aloud'));
+              }
+            }}
+            className="flex items-center gap-1.5 py-1.5 px-2 rounded-lg text-slate-300 hover:text-indigo-300 hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Read Selected Text"
+          >
+            <Volume2 className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Read Text</span>
+          </button>
+        </div>
+
         <button
           onClick={handleSignOut}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-rose-300 hover:text-white hover:bg-rose-900/30 transition-all cursor-pointer"

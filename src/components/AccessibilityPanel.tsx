@@ -49,6 +49,13 @@ export function AccessibilityPanel() {
     }
   }, []);
 
+  // Listen for open event from header/navbar controls
+  useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener('campusfix:open-a11y', handleOpen);
+    return () => window.removeEventListener('campusfix:open-a11y', handleOpen);
+  }, []);
+
   // Keyboard shortcut: Escape closes modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
