@@ -120,7 +120,7 @@ export function AccessibilityPanel() {
   // Read selected text aloud using browser SpeechSynthesis
   const readSelectedText = () => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      alert('Speech synthesis is not supported in this browser.');
+      console.warn('Speech synthesis is not supported in this browser.');
       return;
     }
 
@@ -146,15 +146,16 @@ export function AccessibilityPanel() {
 
   return (
     <>
-      {/* Floating Accessibility Trigger Button (Bottom-Left) */}
+      {/* Floating Accessibility Trigger Button
+          Positioned at bottom-5 left-4 on mobile, and lg:left-72 (288px) on desktop to NEVER overlap the 256px sidebar or Logout button */}
       <button
         onClick={() => setIsOpen(true)}
         aria-label="Open Accessibility Options"
         title="Accessibility Settings (Font size, contrast, reading aloud)"
-        className="fixed bottom-6 left-6 z-40 bg-white/95 backdrop-blur text-slate-700 hover:text-[#0D9488] p-3 rounded-full shadow-lg border border-slate-200/90 hover:shadow-teal-500/20 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-2 group"
+        className="fixed bottom-5 left-4 sm:bottom-6 sm:left-6 lg:left-72 z-30 bg-white/95 backdrop-blur text-slate-700 hover:text-[#0D9488] p-2.5 sm:p-3 rounded-full shadow-lg border border-slate-200/90 hover:shadow-teal-500/20 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-2 group print:hidden"
       >
-        <Eye className="w-5 h-5 text-[#0D9488]" />
-        <span className="hidden md:inline text-xs font-bold pr-1 text-slate-800 group-hover:text-[#0D9488]">
+        <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-[#0D9488]" />
+        <span className="hidden sm:inline text-xs font-bold pr-1 text-slate-800 group-hover:text-[#0D9488]">
           Accessibility
         </span>
       </button>
@@ -165,11 +166,11 @@ export function AccessibilityPanel() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="a11y-title"
-          className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
         >
-          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md max-h-[90dvh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
             {/* Header */}
-            <div className="bg-[#102A43] text-white p-4 flex items-center justify-between">
+            <div className="bg-[#102A43] text-white p-4 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-[#0D9488] flex items-center justify-center text-white">
                   <Eye className="w-4 h-4" />
@@ -194,7 +195,7 @@ export function AccessibilityPanel() {
             </div>
 
             {/* Content Controls */}
-            <div className="p-5 space-y-5 text-slate-800 text-xs sm:text-sm">
+            <div className="p-5 space-y-5 text-slate-800 text-xs sm:text-sm overflow-y-auto">
               {/* 1. Font Size Control */}
               <div className="space-y-1.5">
                 <label className="font-bold text-slate-900 flex items-center gap-1.5">
@@ -210,7 +211,7 @@ export function AccessibilityPanel() {
                     <button
                       key={item.id}
                       onClick={() => updateSetting('fontSize', item.id as any)}
-                      className={`py-2 px-2.5 rounded-xl border text-center font-semibold transition-all cursor-pointer ${
+                      className={`py-2 px-2 rounded-xl border text-center font-semibold transition-all cursor-pointer text-xs ${
                         settings.fontSize === item.id
                           ? 'border-[#0D9488] bg-teal-50 text-[#0D9488] ring-2 ring-teal-500/20'
                           : 'border-slate-200 hover:bg-slate-50 text-slate-700'
@@ -231,7 +232,7 @@ export function AccessibilityPanel() {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => updateSetting('contrast', 'normal')}
-                    className={`py-2 px-3 rounded-xl border text-center font-semibold transition-all cursor-pointer ${
+                    className={`py-2 px-3 rounded-xl border text-center font-semibold transition-all cursor-pointer text-xs ${
                       settings.contrast === 'normal'
                         ? 'border-[#0D9488] bg-teal-50 text-[#0D9488] ring-2 ring-teal-500/20'
                         : 'border-slate-200 hover:bg-slate-50 text-slate-700'
@@ -241,7 +242,7 @@ export function AccessibilityPanel() {
                   </button>
                   <button
                     onClick={() => updateSetting('contrast', 'high')}
-                    className={`py-2 px-3 rounded-xl border text-center font-semibold transition-all cursor-pointer ${
+                    className={`py-2 px-3 rounded-xl border text-center font-semibold transition-all cursor-pointer text-xs ${
                       settings.contrast === 'high'
                         ? 'border-[#102A43] bg-slate-900 text-white font-bold ring-2 ring-slate-900/30'
                         : 'border-slate-300 hover:bg-slate-100 text-slate-800'
@@ -261,7 +262,7 @@ export function AccessibilityPanel() {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => updateSetting('theme', 'light')}
-                    className={`py-2 px-3 rounded-xl border text-center font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    className={`py-2 px-3 rounded-xl border text-center font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-xs ${
                       settings.theme === 'light'
                         ? 'border-[#0D9488] bg-teal-50 text-[#0D9488] ring-2 ring-teal-500/20'
                         : 'border-slate-200 hover:bg-slate-50 text-slate-700'
@@ -271,7 +272,7 @@ export function AccessibilityPanel() {
                   </button>
                   <button
                     onClick={() => updateSetting('theme', 'dark')}
-                    className={`py-2 px-3 rounded-xl border text-center font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    className={`py-2 px-3 rounded-xl border text-center font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-xs ${
                       settings.theme === 'dark'
                         ? 'border-[#102A43] bg-slate-900 text-white ring-2 ring-slate-900/30'
                         : 'border-slate-200 hover:bg-slate-50 text-slate-700'
@@ -296,12 +297,12 @@ export function AccessibilityPanel() {
                   )}
                 </div>
                 <p className="text-[11px] text-slate-500 leading-relaxed">
-                  Highlight any text or issue description on screen, then click the button below to listen with natural text-to-speech.
+                  Highlight any text or issue description on screen, then click below to listen with natural speech.
                 </p>
                 <button
                   type="button"
                   onClick={readSelectedText}
-                  className={`w-full py-2 px-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  className={`w-full py-2 px-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all cursor-pointer text-xs ${
                     isReadingSelection
                       ? 'bg-rose-600 text-white hover:bg-rose-700'
                       : 'bg-indigo-600 text-white hover:bg-indigo-700'

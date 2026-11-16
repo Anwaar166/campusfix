@@ -60,7 +60,7 @@ export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
         const audioBlob = new Blob(audioChunksRef.current, {
           type: recorder.mimeType || 'audio/webm',
         });
-        
+
         setIsTranscribing(true);
         try {
           const formData = new FormData();
@@ -79,7 +79,7 @@ export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
           }
         } catch (err: any) {
           console.error('Whisper voice dictation error:', err);
-          alert(`Voice transcription notice: ${err?.message || 'Failed to transcribe audio'}`);
+          setErrorMsg(`Voice dictation: ${err?.message || 'Failed to transcribe audio'}`);
         } finally {
           setIsTranscribing(false);
         }
@@ -90,7 +90,7 @@ export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
       setIsRecording(true);
     } catch (err: any) {
       console.error('Mic access error:', err);
-      alert('Could not access microphone. Please grant browser microphone permission.');
+      setErrorMsg('Could not access microphone. Please grant browser microphone permission.');
       setIsRecording(false);
     }
   };
@@ -303,11 +303,10 @@ export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
               type="button"
               key={item.level}
               onClick={() => setUrgency(item.level as IssueUrgency)}
-              className={`p-3 rounded-xl border text-left transition-all ${
-                urgency === item.level
+              className={`p-3 rounded-xl border text-left transition-all ${urgency === item.level
                   ? 'border-indigo-600 bg-indigo-50/70 ring-2 ring-indigo-500/20'
                   : 'border-slate-200 bg-white hover:bg-slate-50'
-              }`}
+                }`}
             >
               <div className="text-xs font-bold text-slate-900">{item.level}</div>
               <div className="text-[10px] text-slate-500 leading-tight mt-0.5">{item.desc}</div>
@@ -328,11 +327,10 @@ export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
             type="button"
             onClick={isRecording ? stopVoiceDictation : startVoiceDictation}
             disabled={isTranscribing}
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              isRecording
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${isRecording
                 ? 'bg-rose-600 text-white animate-pulse shadow-xs'
                 : 'bg-teal-50 text-[#0D9488] border border-teal-200 hover:bg-teal-100'
-            }`}
+              }`}
           >
             {isRecording ? (
               <>

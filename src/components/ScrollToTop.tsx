@@ -8,10 +8,12 @@ export function ScrollToTop() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 240) {
-        setVisible(true);
-      } else {
-        setVisible(false);
+      if (typeof window !== 'undefined') {
+        if (window.scrollY > 280) {
+          setVisible(true);
+        } else {
+          setVisible(false);
+        }
       }
     };
 
@@ -20,26 +22,27 @@ export function ScrollToTop() {
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
+    if (typeof window !== 'undefined') {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    }
   };
 
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 animate-in fade-in zoom-in-95 slide-in-from-bottom-4">
+    <div className="fixed bottom-20 right-4 sm:bottom-22 sm:right-6 z-30 transition-all duration-300 animate-in fade-in zoom-in-95 print:hidden">
       <button
         onClick={scrollToTop}
         type="button"
-        aria-label="Scroll back to top"
-        className="group flex items-center gap-2 px-4 py-2.5 rounded-full bg-slate-900/90 hover:bg-indigo-600 text-white text-xs font-semibold shadow-xl shadow-slate-900/20 hover:shadow-indigo-500/30 backdrop-blur-md border border-white/20 transition-all duration-200 hover:scale-105 active:scale-95"
+        aria-label="Back to top"
+        title="Scroll back to top"
+        className="group flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-full bg-slate-900/90 hover:bg-[#0D9488] text-white text-xs font-semibold shadow-xl shadow-slate-900/20 hover:shadow-teal-500/30 backdrop-blur-md border border-white/20 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
       >
-        <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-indigo-600 transition-colors">
-          <ArrowUp className="w-3.5 h-3.5 transition-transform group-hover:-translate-y-0.5" />
-        </div>
-        <span>Back to Top</span>
+        <ArrowUp className="w-3.5 h-3.5 transition-transform group-hover:-translate-y-0.5 text-teal-300 group-hover:text-white" />
+        <span className="hidden sm:inline">Top</span>
       </button>
     </div>
   );

@@ -6,10 +6,18 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get('code');
   const token_hash = requestUrl.searchParams.get('token_hash');
   const type = requestUrl.searchParams.get('type') as any;
-  const next = requestUrl.searchParams.get('next') || '/login?verified=true';
+  const errorParam = requestUrl.searchParams.get('error');
+  const errorDescription = requestUrl.searchParams.get('error_description');
 
-  let redirectUrl = new URL(next, requestUrl.origin);
-  let response = NextResponse.redirect(redirectUrl);
+  // If Supabase returned an explicit error in callback URL
+  if (errorParam) {
+    const errorUrl = new URL('/verify-email', requestUrl.origin);
+    errorUrl.searchParams.set('status', 'failed');
+    errorUrl.searchParams.set('reason', errorDescription || errorParam);
+    return NextResponse.redirect(errorUrl);
+  }
+
+  let response = NextResponse.next();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,35 +36,54 @@ export async function GET(request: NextRequest) {
     }
   );
 
+  // 1. Handle OTP Token Hash (typical Supabase email confirmation link)
   if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({
       token_hash,
       type,
     });
+
     if (!error) {
-      const successUrl = new URL('/login?verified=true', requestUrl.origin);
+      const successUrl = new URL('/verify-email', requestUrl.origin);
+      successUrl.searchParams.set('status', 'success');
       const successResponse = NextResponse.redirect(successUrl);
       response.cookies.getAll().forEach((c) => {
         successResponse.cookies.set(c.name, c.value);
       });
       return successResponse;
+    } else {
+      console.warn('Supabase verifyOtp failed:', error.message);
+      const failUrl = new URL('/verify-email', requestUrl.origin);
+      failUrl.searchParams.set('status', 'failed');
+      failUrl.searchParams.set('reason', error.message);
+      return NextResponse.redirect(failUrl);
     }
   }
 
+  // 2. Handle PKCE Code exchange
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+
     if (!error) {
-      const successUrl = new URL('/login?verified=true', requestUrl.origin);
+      const successUrl = new URL('/verify-email', requestUrl.origin);
+      successUrl.searchParams.set('status', 'success');
       const successResponse = NextResponse.redirect(successUrl);
       response.cookies.getAll().forEach((c) => {
         successResponse.cookies.set(c.name, c.value);
       });
       return successResponse;
+    } else {
+      console.warn('Supabase exchangeCodeForSession failed:', error.message);
+      const failUrl = new URL('/verify-email', requestUrl.origin);
+      failUrl.searchParams.set('status', 'failed');
+      failUrl.searchParams.set('reason', error.message);
+      return NextResponse.redirect(failUrl);
     }
   }
 
-  // If verification failed or expired
-  return NextResponse.redirect(
-    new URL('/login?error=verification_failed', requestUrl.origin)
-  );
+  // If no code, token_hash, or recognized auth payload was provided
+  const invalidUrl = new URL('/verify-email', requestUrl.origin);
+  invalidUrl.searchParams.set('status', 'failed');
+  invalidUrl.searchParams.set('reason', 'Verification token is missing or has already been used.');
+  return NextResponse.redirect(invalidUrl);
 }

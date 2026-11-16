@@ -13,11 +13,15 @@ import {
   Volume2,
   VolumeX,
   Square,
+  Pause,
+  Play,
   Globe,
   Cpu,
   RotateCcw,
   AlertCircle,
   Lightbulb,
+  CheckCircle2,
+  RefreshCw,
 } from 'lucide-react';
 
 interface Message {
@@ -52,14 +56,18 @@ export function CampusFixAI() {
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [voiceNotice, setVoiceNotice] = useState<{ type: 'info' | 'success' | 'error'; text: string } | null>(null);
+
+  // Audio Playback State
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [isAudioPaused, setIsAudioPaused] = useState(false);
   const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
 
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
       sender: 'ai',
-      text: `Hello! I'm **CampusFix AI**, your smart facilities assistant. 🤖\n\nI can help you report issues, choose categories, track repair statuses, and answer campus maintenance questions in **English, Urdu, or Roman Urdu**.\n\n🎙️ *Voice Mode enabled:* Use the microphone button to speak, or click the speaker to listen!`,
+      text: `Hello! I'm **CampusFix AI**, your smart facilities assistant. 🤖\n\nI can help you report issues, choose categories, track repair statuses, and answer campus maintenance questions in **English, Urdu, or Roman Urdu**.\n\n🎙️ *Voice Mode enabled:* Use the microphone button to speak with Groq Whisper, or click the speaker to listen with Groq Orpheus!`,
       time: 'Just now',
       model: 'CampusFix Smart Engine',
     },
@@ -70,6 +78,17 @@ export function CampusFixAI() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const noticeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showVoiceNotice = (type: 'info' | 'success' | 'error', text: string, autoHide = true) => {
+    setVoiceNotice({ type, text });
+    if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current);
+    if (autoHide) {
+      noticeTimerRef.current = setTimeout(() => {
+        setVoiceNotice(null);
+      }, 4000);
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -99,13 +118,36 @@ export function CampusFixAI() {
       window.speechSynthesis.cancel();
     }
     setIsPlayingAudio(false);
+    setIsAudioPaused(false);
     setCurrentlyPlayingId(null);
+  };
+
+  const pauseAudio = () => {
+    if (currentAudioRef.current && isPlayingAudio) {
+      currentAudioRef.current.pause();
+      setIsAudioPaused(true);
+    } else if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.pause();
+      setIsAudioPaused(true);
+    }
+  };
+
+  const resumeAudio = () => {
+    if (currentAudioRef.current && isPlayingAudio && isAudioPaused) {
+      currentAudioRef.current.play();
+      setIsAudioPaused(false);
+    } else if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.resume();
+      setIsAudioPaused(false);
+    }
   };
 
   // -------------------------------------------------------------
   // SPEECH-TO-TEXT: Groq Whisper (whisper-large-v3-turbo)
   // -------------------------------------------------------------
   const startRecording = async () => {
+    if (isRecording || isTranscribing) return;
+
     try {
       stopAudio();
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -132,9 +174,10 @@ export function CampusFixAI() {
       mediaRecorderRef.current = recorder;
       recorder.start();
       setIsRecording(true);
+      showVoiceNotice('info', '🎙️ Listening... (Speak clearly into your microphone, click mic to finish)', false);
     } catch (err: any) {
       console.error('Microphone access error:', err);
-      alert('Could not access microphone. Please allow microphone permissions in your browser.');
+      showVoiceNotice('error', 'Microphone permission denied. Please allow microphone access in your browser.');
       setIsRecording(false);
     }
   };
@@ -143,6 +186,7 @@ export function CampusFixAI() {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      showVoiceNotice('info', '⏳ Processing audio with Groq Whisper (whisper-large-v3-turbo)...', false);
     }
   };
 
@@ -164,12 +208,15 @@ export function CampusFixAI() {
       }
 
       if (data.text) {
-        // Put recognized text in input field so user can inspect and edit
+        // Put recognized text in input field so user can inspect and edit BEFORE sending
         setInput((prev) => (prev ? `${prev} ${data.text}` : data.text));
+        showVoiceNotice('success', 'Transcription complete! Review and edit your text, then click Send.');
+      } else {
+        showVoiceNotice('info', 'No clear speech detected. Please speak closer to your microphone.');
       }
     } catch (err: any) {
       console.error('Whisper STT error:', err);
-      alert(`Speech recognition notice: ${err?.message || 'Failed to transcribe audio'}`);
+      showVoiceNotice('error', `Speech error: ${err?.message || 'Failed to transcribe audio'}`);
     } finally {
       setIsTranscribing(false);
     }
@@ -186,11 +233,14 @@ export function CampusFixAI() {
 
     stopAudio();
     setIsPlayingAudio(true);
+    setIsAudioPaused(false);
     setCurrentlyPlayingId(msgId);
 
     try {
-      // If language is Urdu, Orpheus is English-focused, so use browser TTS as fallback
+      // Honest language check: Orpheus v1 is English-focused.
+      // If language is Urdu, inform honestly and use browser SpeechSynthesis with ur-PK.
       if (language === 'ur') {
+        showVoiceNotice('info', 'Orpheus TTS is English-only. Using browser speech synthesis for Urdu.');
         if ('speechSynthesis' in window) {
           const cleanText = textToSpeak.replace(/[#*`_]/g, '');
           const utterance = new SpeechSynthesisUtterance(cleanText);
@@ -200,9 +250,11 @@ export function CampusFixAI() {
           window.speechSynthesis.speak(utterance);
           return;
         }
+        stopAudio();
+        return;
       }
 
-      // Call Groq Orpheus API
+      // Call Groq Orpheus API endpoint
       const res = await fetch('/api/ai/speech', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -216,7 +268,7 @@ export function CampusFixAI() {
 
       if (!res.ok) {
         const errJson = await res.json().catch(() => null);
-        console.warn('Groq Orpheus API unavailable, using browser speech synthesis:', errJson);
+        console.warn('Groq Orpheus API unavailable, falling back to browser speech:', errJson);
 
         // Fallback to browser SpeechSynthesis
         if ('speechSynthesis' in window) {
@@ -237,12 +289,8 @@ export function CampusFixAI() {
       const audio = new Audio(audioUrl);
       currentAudioRef.current = audio;
 
-      audio.onended = () => {
-        stopAudio();
-      };
-      audio.onerror = () => {
-        stopAudio();
-      };
+      audio.onended = () => stopAudio();
+      audio.onerror = () => stopAudio();
 
       await audio.play();
     } catch (err) {
@@ -308,14 +356,16 @@ export function CampusFixAI() {
         setTimeout(() => playSpeech(newMsgId, replyText), 200);
       }
     } catch (err: any) {
-      console.error('CampusFix AI Chat error:', err);
-      const errorReply: Message = {
-        id: (Date.now() + 1).toString(),
-        sender: 'ai',
-        text: 'Sorry, I encountered an issue connecting to the AI backend. Please verify your network and credentials.',
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      };
-      setMessages((prev) => [...prev, errorReply]);
+      console.error('Chat error:', err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          sender: 'ai',
+          text: `⚠️ **Connection Error**: ${err?.message || 'Could not communicate with the AI Assistant. Please check your network and try again.'}`,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -325,65 +375,45 @@ export function CampusFixAI() {
     stopAudio();
     setMessages([
       {
-        id: 'welcome',
+        id: 'reset',
         sender: 'ai',
-        text: `Hello! I'm **CampusFix AI**, your smart facilities assistant. 🤖\n\nNeed help reporting a broken facility, choosing the right category, or tracking an existing maintenance request? Ask me anything!`,
+        text: 'Conversation cleared. How can I help you with CampusFix facilities today?',
         time: 'Just now',
-        model: 'CampusFix Smart Engine',
       },
     ]);
   };
 
-  // Helper to render markdown-like formatting cleanly
+  // Helper to format markdown text
   const renderMessageText = (text: string) => {
-    return (
-      <div className="space-y-1.5 text-xs sm:text-sm leading-relaxed">
-        {text.split('\n').map((line, idx) => {
-          if (!line.trim()) return <div key={idx} className="h-1" />;
-
-          if (line.startsWith('### ')) {
-            return (
-              <h4 key={idx} className="font-bold text-slate-900 mt-2 text-sm sm:text-base border-b border-slate-200/60 pb-1">
-                {line.replace('### ', '')}
-              </h4>
-            );
-          }
-
-          if (line.startsWith('- ') || line.startsWith('* ')) {
-            return (
-              <div key={idx} className="flex items-start gap-1.5 pl-1">
-                <span className="text-[#0D9488] font-bold leading-tight mt-0.5">•</span>
-                <span>{formatBoldText(line.substring(2))}</span>
-              </div>
-            );
-          }
-
-          const numMatch = line.match(/^(\d+)\.\s(.*)/);
-          if (numMatch) {
-            return (
-              <div key={idx} className="flex items-start gap-1.5 pl-1">
-                <span className="font-semibold text-teal-700 min-w-[1.2rem]">{numMatch[1]}.</span>
-                <span>{formatBoldText(numMatch[2])}</span>
-              </div>
-            );
-          }
-
-          if (line.startsWith('> ')) {
-            return (
-              <blockquote key={idx} className="border-l-2 border-teal-500 pl-2.5 py-0.5 my-1 bg-teal-50/50 rounded-r text-slate-700 italic">
-                {formatBoldText(line.substring(2))}
-              </blockquote>
-            );
-          }
-
-          return <p key={idx}>{formatBoldText(line)}</p>;
-        })}
-      </div>
-    );
+    const lines = text.split('\n');
+    return lines.map((line, idx) => {
+      if (line.startsWith('### ')) {
+        return (
+          <h4 key={idx} className="font-bold text-sm text-[#102A43] mt-2 mb-1">
+            {line.replace('### ', '')}
+          </h4>
+        );
+      }
+      if (line.startsWith('- ') || line.startsWith('* ')) {
+        return (
+          <li key={idx} className="ml-4 list-disc text-xs sm:text-sm text-slate-700">
+            {formatBold(line.substring(2))}
+          </li>
+        );
+      }
+      if (line.trim() === '') {
+        return <div key={idx} className="h-1.5" />;
+      }
+      return (
+        <p key={idx} className="text-xs sm:text-sm text-slate-800 leading-relaxed">
+          {formatBold(line)}
+        </p>
+      );
+    });
   };
 
-  const formatBoldText = (str: string) => {
-    const parts = str.split(/(\*\*.*?\*\*)/g);
+  const formatBold = (str: string) => {
+    const parts = str.split(/(\*\*[^*]+\*\*)/g);
     return parts.map((part, i) => {
       if (part.startsWith('**') && part.endsWith('**')) {
         return (
@@ -397,26 +427,26 @@ export function CampusFixAI() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 font-sans print:hidden">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 font-sans print:hidden">
       {/* Floating Robot Trigger Button */}
       {!isOpen && (
         <div className="relative group">
           <button
             onClick={() => setIsOpen(true)}
             aria-label="Open CampusFix AI Assistant"
-            className="flex items-center gap-3 bg-gradient-to-r from-[#102A43] to-[#0D9488] text-white p-3.5 sm:px-5 sm:py-3.5 rounded-full shadow-2xl hover:shadow-teal-500/30 hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-white/40 cursor-pointer"
+            className="flex items-center gap-2.5 sm:gap-3 bg-gradient-to-r from-[#102A43] to-[#0D9488] text-white p-3 sm:px-5 sm:py-3.5 rounded-full shadow-2xl hover:shadow-teal-500/30 hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-white/40 cursor-pointer"
           >
-            {/* 3D-Styled Robot Icon */}
+            {/* 3D Robot Avatar */}
             <div className="relative flex items-center justify-center">
-              <div className="w-9 h-9 rounded-full bg-white/15 backdrop-blur flex items-center justify-center shadow-inner border border-white/30 animate-pulse">
-                <Bot className="w-5 h-5 text-teal-300 drop-shadow" />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/15 backdrop-blur flex items-center justify-center shadow-inner border border-white/30 animate-pulse">
+                <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-teal-300 drop-shadow" />
               </div>
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-[#102A43] rounded-full animate-ping" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-[#102A43] rounded-full" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#102A43] rounded-full animate-ping" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#102A43] rounded-full" />
             </div>
 
             <div className="hidden sm:block text-left pr-1">
-              <div className="text-[11px] font-medium tracking-wide uppercase text-teal-300 leading-none">
+              <div className="text-[10px] font-medium tracking-wide uppercase text-teal-300 leading-none">
                 Smart Assistant
               </div>
               <div className="text-sm font-bold text-white leading-tight flex items-center gap-1">
@@ -425,7 +455,7 @@ export function CampusFixAI() {
             </div>
           </button>
 
-          {/* Hover Tooltip on desktop */}
+          {/* Desktop Hover Tooltip */}
           <div className="hidden group-hover:block absolute bottom-full right-0 mb-3 w-60 p-2.5 bg-slate-900 text-white text-xs rounded-xl shadow-xl pointer-events-none transition-opacity">
             <p className="font-semibold text-teal-300 flex items-center gap-1 mb-0.5">
               <Bot className="w-3.5 h-3.5" /> Ask CampusFix AI
@@ -442,12 +472,12 @@ export function CampusFixAI() {
         <div
           className={`bg-white rounded-2xl shadow-2xl border border-slate-200/90 flex flex-col transition-all duration-300 overflow-hidden ${
             isMinimized
-              ? 'w-80 sm:w-96 h-16'
-              : 'w-[92vw] sm:w-[440px] h-[620px] max-h-[88vh]'
+              ? 'w-72 sm:w-96 h-14'
+              : 'w-[calc(100vw-2rem)] sm:w-[440px] max-w-lg h-[560px] max-h-[82dvh]'
           }`}
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#102A43] via-[#163654] to-[#0D9488] p-3 text-white flex items-center justify-between shadow-sm select-none">
+          <div className="bg-gradient-to-r from-[#102A43] via-[#163654] to-[#0D9488] p-3 text-white flex items-center justify-between shadow-sm select-none shrink-0">
             <div className="flex items-center gap-2">
               <div className="relative">
                 <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40">
@@ -517,7 +547,7 @@ export function CampusFixAI() {
 
           {/* Subheader Toolbar: AI Provider & Language Selection */}
           {!isMinimized && (
-            <div className="px-3 py-1.5 bg-slate-100/90 border-b border-slate-200 flex items-center justify-between text-[11px] text-slate-600">
+            <div className="px-3 py-1.5 bg-slate-100/90 border-b border-slate-200 flex items-center justify-between text-[11px] text-slate-600 shrink-0">
               <div className="flex items-center gap-1.5">
                 <Cpu className="w-3 h-3 text-teal-600" />
                 <span className="font-semibold text-slate-700">Model:</span>
@@ -578,102 +608,97 @@ export function CampusFixAI() {
                             {msg.model || (provider === 'gemini' ? 'gemini-4-hydrogen' : 'gpt-oss-120b')}
                           </span>
 
-                          <button
-                            onClick={() => playSpeech(msg.id, msg.text)}
-                            title={currentlyPlayingId === msg.id && isPlayingAudio ? 'Stop speaking' : 'Read aloud with Orpheus'}
-                            aria-label="Read response aloud"
-                            className="inline-flex items-center gap-1 text-slate-500 hover:text-teal-700 transition-colors cursor-pointer px-1.5 py-0.5 rounded hover:bg-slate-100"
-                          >
+                          <div className="flex items-center gap-1">
                             {currentlyPlayingId === msg.id && isPlayingAudio ? (
-                              <>
-                                <Square className="w-3 h-3 text-rose-500 fill-rose-500 animate-pulse" />
-                                <span className="text-rose-600 font-semibold">Stop</span>
-                              </>
+                              <div className="flex items-center gap-1 bg-teal-50 border border-teal-200 rounded px-1.5 py-0.5">
+                                <button
+                                  type="button"
+                                  onClick={isAudioPaused ? resumeAudio : pauseAudio}
+                                  title={isAudioPaused ? 'Resume audio' : 'Pause audio'}
+                                  className="text-teal-700 hover:text-teal-900 cursor-pointer"
+                                >
+                                  {isAudioPaused ? <Play className="w-3 h-3 fill-teal-700" /> : <Pause className="w-3 h-3" />}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={stopAudio}
+                                  title="Stop audio"
+                                  className="text-rose-600 hover:text-rose-800 cursor-pointer"
+                                >
+                                  <Square className="w-2.5 h-2.5 fill-rose-600" />
+                                </button>
+                                <span className="text-[9px] font-bold text-teal-800">
+                                  {isAudioPaused ? 'Paused' : 'Playing'}
+                                </span>
+                              </div>
                             ) : (
-                              <>
+                              <button
+                                type="button"
+                                onClick={() => playSpeech(msg.id, msg.text)}
+                                title="Read aloud with Groq Orpheus"
+                                aria-label="Read response aloud"
+                                className="inline-flex items-center gap-1 text-slate-500 hover:text-teal-700 transition-colors cursor-pointer px-1.5 py-0.5 rounded hover:bg-slate-100"
+                              >
                                 <Volume2 className="w-3 h-3 text-teal-600" />
                                 <span>Speak</span>
-                              </>
+                              </button>
                             )}
-                          </button>
+                          </div>
                         </div>
                       )}
                     </div>
-
-                    <span className="text-[9px] text-slate-400 mt-0.5 px-1">
-                      {msg.time}
-                    </span>
+                    <span className="text-[10px] text-slate-400 mt-1 px-1">{msg.time}</span>
                   </div>
                 ))}
 
-                {/* Loading / Speaking Indicators */}
                 {loading && (
-                  <div className="flex items-center gap-2 text-slate-500 bg-white border border-slate-200 rounded-2xl rounded-bl-none px-3.5 py-2.5 shadow-sm w-fit">
-                    <div className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-teal-500 animate-bounce" />
-                      <span className="w-2 h-2 rounded-full bg-teal-500 animate-bounce [animation-delay:0.2s]" />
-                      <span className="w-2 h-2 rounded-full bg-teal-500 animate-bounce [animation-delay:0.4s]" />
-                    </div>
-                    <span className="text-xs font-medium text-slate-600 ml-1">
-                      {provider === 'gemini' ? 'Gemini 4 Hydrogen thinking...' : 'Groq 120B reasoning...'}
-                    </span>
-                  </div>
-                )}
-
-                {isTranscribing && (
-                  <div className="flex items-center gap-2 text-teal-700 bg-teal-50 border border-teal-200 rounded-2xl px-3.5 py-2 shadow-sm w-fit">
-                    <Mic className="w-4 h-4 text-teal-600 animate-pulse" />
-                    <span className="text-xs font-semibold">
-                      Whisper Large v3 Turbo transcribing speech...
-                    </span>
-                  </div>
-                )}
-
-                {isPlayingAudio && (
-                  <div className="flex items-center gap-2 text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-full px-3 py-1 shadow-sm w-fit text-xs">
-                    <Volume2 className="w-3.5 h-3.5 animate-pulse text-indigo-600" />
-                    <span>Orpheus TTS playing audio...</span>
-                    <button
-                      onClick={stopAudio}
-                      className="ml-1 text-[10px] font-bold text-rose-600 hover:underline cursor-pointer"
-                    >
-                      [Stop]
-                    </button>
+                  <div className="flex items-center gap-2 p-3 bg-white rounded-2xl border border-slate-200 text-xs text-slate-600 max-w-[70%]">
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-teal-600" />
+                    <span>Thinking with {provider === 'gemini' ? 'Gemini 4 Hydrogen' : 'Groq 120B'}...</span>
                   </div>
                 )}
 
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Quick Prompt Chips */}
-              <div className="px-3 py-1.5 bg-slate-100 border-t border-slate-200 overflow-x-auto whitespace-nowrap flex items-center gap-1.5 scrollbar-thin">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 pl-1">
-                  <Lightbulb className="w-3 h-3 text-amber-500" /> Prompts:
+              {/* Quick Prompts Bar */}
+              <div className="px-3 py-1.5 bg-white border-t border-slate-200 flex items-center gap-1.5 overflow-x-auto text-[11px] no-scrollbar shrink-0">
+                <span className="text-slate-400 font-semibold shrink-0 flex items-center gap-1 text-[10px]">
+                  <Lightbulb className="w-3 h-3 text-amber-500" /> Quick:
                 </span>
-                {QUICK_PROMPTS.map((p, idx) => (
+                {QUICK_PROMPTS.map((p, i) => (
                   <button
-                    key={idx}
+                    key={i}
                     onClick={() => handleSendMessage(p.query)}
-                    disabled={loading || isRecording}
-                    className="inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-white border border-slate-300 text-slate-700 hover:bg-teal-50 hover:text-teal-800 hover:border-teal-300 transition-colors shadow-2xs font-medium cursor-pointer disabled:opacity-50"
+                    className="shrink-0 px-2 py-0.5 rounded-full bg-slate-100 hover:bg-teal-50 hover:text-teal-800 text-slate-600 text-[11px] transition-colors border border-slate-200/80 cursor-pointer"
                   >
                     {p.label}
                   </button>
                 ))}
               </div>
 
-              {/* Recording Status Banner */}
-              {isRecording && (
-                <div className="px-3 py-2 bg-rose-50 border-t border-rose-200 flex items-center justify-between text-xs text-rose-700 animate-pulse">
-                  <div className="flex items-center gap-2 font-semibold">
-                    <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-ping" />
-                    Recording voice input with microphone...
-                  </div>
+              {/* Status / Listening / Voice Notice Banner */}
+              {voiceNotice && (
+                <div
+                  className={`px-3 py-1.5 text-xs flex items-center gap-2 border-t shrink-0 ${
+                    voiceNotice.type === 'info'
+                      ? 'bg-indigo-50 border-indigo-200 text-indigo-900'
+                      : voiceNotice.type === 'success'
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                      : 'bg-rose-50 border-rose-200 text-rose-900'
+                  }`}
+                >
+                  {voiceNotice.type === 'success' ? (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  ) : (
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  )}
+                  <span className="flex-1 truncate">{voiceNotice.text}</span>
                   <button
-                    onClick={stopRecording}
-                    className="px-2.5 py-1 bg-rose-600 text-white rounded-lg text-xs font-bold hover:bg-rose-700 transition cursor-pointer"
+                    onClick={() => setVoiceNotice(null)}
+                    className="text-slate-400 hover:text-slate-600 cursor-pointer"
                   >
-                    Done Speaking
+                    <X className="w-3 h-3" />
                   </button>
                 </div>
               )}
@@ -684,7 +709,7 @@ export function CampusFixAI() {
                   e.preventDefault();
                   handleSendMessage();
                 }}
-                className="p-2.5 bg-white border-t border-slate-200 flex items-center gap-1.5"
+                className="p-2.5 bg-white border-t border-slate-200 flex items-center gap-1.5 shrink-0"
               >
                 {/* Voice Input Button (Groq Whisper STT) */}
                 <button

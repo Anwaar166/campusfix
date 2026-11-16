@@ -4,6 +4,7 @@ import "./globals.css";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { CampusFixAI } from "@/components/CampusFixAI";
 import { AccessibilityPanel } from "@/components/AccessibilityPanel";
+import { ReadAloudButton } from "@/components/ReadAloudButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,7 @@ export default function RootLayout({
         {children}
         <CampusFixAI />
         <AccessibilityPanel />
+        <ReadAloudButton />
         <ScrollToTop />
       </body>
     </html>
