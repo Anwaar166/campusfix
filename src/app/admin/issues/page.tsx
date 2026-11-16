@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getCurrentUser, getUnreadNotificationCount } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { Navbar } from '@/components/Navbar';
+import { DashboardSidebar } from '@/components/DashboardSidebar';
 import { Footer } from '@/components/Footer';
 import { AdminNav } from '@/components/AdminNav';
 import { StatusBadge } from '@/components/StatusBadge';
@@ -67,9 +67,10 @@ export default async function AdminIssuesPage({ searchParams }: PageProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      <Navbar initialProfile={profile} unreadCount={unreadCount} />
+      <DashboardSidebar profile={profile} unreadCount={unreadCount} />
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div className="lg:pl-64 flex-1 flex flex-col justify-between">
+        <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <div>
           <div className="flex items-center gap-2 text-indigo-600 mb-1">
             <Wrench className="w-5 h-5" />
@@ -188,7 +189,8 @@ export default async function AdminIssuesPage({ searchParams }: PageProps) {
         </div>
       </main>
 
-      <Footer />
+        <Footer />
+      </div>
     </div>
   );
 }

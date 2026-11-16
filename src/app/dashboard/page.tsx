@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getCurrentUser, getUnreadNotificationCount } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { Navbar } from '@/components/Navbar';
+import { DashboardSidebar } from '@/components/DashboardSidebar';
 import { Footer } from '@/components/Footer';
 import { IssueCard } from '@/components/IssueCard';
 import {
@@ -83,136 +83,38 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
-      <Navbar initialProfile={profile} unreadCount={unreadCount} />
+      {/* Dedicated Workspace Left Sidebar */}
+      <DashboardSidebar profile={profile} unreadCount={unreadCount} />
 
-      <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* SIDEBAR NAVIGATION (RECOMMENDED LAYOUT) */}
-          <aside className="lg:col-span-3 bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs space-y-6">
-            {/* User Profile Snippet */}
-            <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-              <div className="w-12 h-12 rounded-2xl bg-[#102A43] text-teal-300 font-extrabold text-base flex items-center justify-center shrink-0">
-                {profile?.full_name?.charAt(0) || 'U'}
+      {/* Main Content Area with sidebar offset on desktop */}
+      <div className="lg:pl-64 flex-1 flex flex-col justify-between">
+        <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+          {/* Welcome Banner */}
+          <div className="bg-[#102A43] text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-6 border border-slate-800">
+            {/* Subtle Glow */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/15 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="space-y-2 relative z-10">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-xs font-semibold backdrop-blur-xs">
+                <Sparkles className="w-3.5 h-3.5 text-teal-400" />
+                <span>{roleDisplay} Control Center</span>
               </div>
-              <div className="min-w-0">
-                <div className="font-bold text-sm text-[#102A43] truncate">
-                  {profile?.full_name || 'Campus Member'}
-                </div>
-                <div className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0D9488]">
-                  <span>{roleDisplay}</span>
-                  <span className="text-slate-400">•</span>
-                  <span className="text-slate-500 truncate">{profile?.department || 'Campus'}</span>
-                </div>
-              </div>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                Welcome back, {profile?.full_name?.split(' ')[0] || 'Campus Member'}!
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
+                Track the real-time resolution status of your maintenance requests, review timeline updates, and help prioritize campus repairs.
+              </p>
             </div>
 
-            {/* Sidebar Links */}
-            <nav className="space-y-1 text-xs font-bold text-slate-600">
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-teal-50 text-[#0D9488] transition-colors"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                <span>Dashboard</span>
-              </Link>
-
-              <Link
-                href="/issues"
-                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl hover:bg-slate-50 hover:text-[#102A43] transition-colors"
-              >
-                <Compass className="w-4 h-4 text-slate-400" />
-                <span>Campus Feed</span>
-              </Link>
-
-              <Link
-                href="/issues/new"
-                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-[#0D9488] hover:bg-teal-50/60 transition-colors"
-              >
-                <PlusCircle className="w-4 h-4" />
-                <span>Report an Issue</span>
-              </Link>
-
-              <Link
-                href="/my-issues"
-                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl hover:bg-slate-50 hover:text-[#102A43] transition-colors"
-              >
-                <Building2 className="w-4 h-4 text-slate-400" />
-                <span>My Issues</span>
-                <span className="ml-auto text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">
-                  {totalMyReports}
-                </span>
-              </Link>
-
-              <Link
-                href="/notifications"
-                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl hover:bg-slate-50 hover:text-[#102A43] transition-colors"
-              >
-                <Bell className="w-4 h-4 text-slate-400" />
-                <span>Notifications</span>
-                {unreadCount > 0 && (
-                  <span className="ml-auto text-[10px] bg-rose-500 text-white px-2 py-0.5 rounded-full font-bold">
-                    {unreadCount}
-                  </span>
-                )}
-              </Link>
-
-              <Link
-                href="/profile"
-                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl hover:bg-slate-50 hover:text-[#102A43] transition-colors"
-              >
-                <User className="w-4 h-4 text-slate-400" />
-                <span>My Profile</span>
-              </Link>
-
-              <Link
-                href="/profile"
-                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl hover:bg-slate-50 hover:text-[#102A43] transition-colors"
-              >
-                <Settings className="w-4 h-4 text-slate-400" />
-                <span>Settings</span>
-              </Link>
-            </nav>
-
-            {/* Quick Action Button in Sidebar */}
-            <div className="pt-2">
-              <Link
-                href="/issues/new"
-                className="w-full inline-flex items-center justify-center gap-2 bg-[#0D9488] hover:bg-[#0f766e] text-white font-bold text-xs py-3 px-4 rounded-xl shadow-xs hover:shadow transition-all"
-              >
-                <PlusCircle className="w-4 h-4" />
-                <span>Report New Issue</span>
-              </Link>
-            </div>
-          </aside>
-
-          {/* MAIN DASHBOARD CONTENT */}
-          <main className="lg:col-span-9 space-y-6">
-            {/* Welcome Banner */}
-            <div className="bg-[#102A43] text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-6 border border-slate-800">
-              {/* Subtle Glow */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/15 rounded-full blur-2xl pointer-events-none" />
-
-              <div className="space-y-2 relative z-10">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-xs font-semibold backdrop-blur-xs">
-                  <Sparkles className="w-3.5 h-3.5 text-teal-400" />
-                  <span>{roleDisplay} Control Center</span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                  Welcome back, {profile?.full_name?.split(' ')[0] || 'Campus Member'}!
-                </h1>
-                <p className="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
-                  Track the real-time resolution status of your maintenance requests, review timeline updates, and help prioritize campus repairs.
-                </p>
-              </div>
-
-              <Link
-                href="/issues/new"
-                className="inline-flex items-center justify-center gap-2 bg-[#0D9488] hover:bg-teal-500 text-white font-bold text-xs sm:text-sm px-5 py-3 rounded-xl shadow-md transition-all shrink-0 self-start sm:self-auto"
-              >
-                <PlusCircle className="w-4 h-4" />
-                <span>Report New Issue</span>
-              </Link>
-            </div>
+            <Link
+              href="/issues/new"
+              className="inline-flex items-center justify-center gap-2 bg-[#0D9488] hover:bg-teal-500 text-white font-bold text-xs sm:text-sm px-5 py-3 rounded-xl shadow-md transition-all shrink-0 self-start sm:self-auto"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>Report New Issue</span>
+            </Link>
+          </div>
 
             {/* 4 KPI Cards Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -381,10 +283,9 @@ export default async function DashboardPage() {
               </div>
             )}
           </main>
-        </div>
-      </div>
 
-      <Footer />
+        <Footer />
+      </div>
     </div>
   );
 }

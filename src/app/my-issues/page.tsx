@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getCurrentUser, getUnreadNotificationCount } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { Navbar } from '@/components/Navbar';
+import { DashboardSidebar } from '@/components/DashboardSidebar';
 import { Footer } from '@/components/Footer';
 import { IssueCard } from '@/components/IssueCard';
 import { IssueWithCounts } from '@/types/database';
@@ -36,9 +36,10 @@ export default async function MyIssuesPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      <Navbar initialProfile={profile} unreadCount={unreadCount} />
+      <DashboardSidebar profile={profile} unreadCount={unreadCount} />
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div className="lg:pl-64 flex-1 flex flex-col justify-between">
+        <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
@@ -92,7 +93,8 @@ export default async function MyIssuesPage() {
         )}
       </main>
 
-      <Footer />
+        <Footer />
+      </div>
     </div>
   );
 }

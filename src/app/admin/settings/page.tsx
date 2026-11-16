@@ -2,7 +2,7 @@ import React from 'react';
 import { redirect } from 'next/navigation';
 import { getCurrentUser, getUnreadNotificationCount } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { Navbar } from '@/components/Navbar';
+import { DashboardSidebar } from '@/components/DashboardSidebar';
 import { Footer } from '@/components/Footer';
 import { AdminNav } from '@/components/AdminNav';
 import { AdminSettingsManager } from '@/components/AdminSettingsManager';
@@ -29,34 +29,36 @@ export default async function AdminSettingsPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      <Navbar initialProfile={profile} unreadCount={unreadCount} />
+      <DashboardSidebar profile={profile} unreadCount={unreadCount} />
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        <div>
-          <div className="flex items-center gap-2 text-indigo-600 mb-1">
-            <Settings className="w-5 h-5" />
-            <span className="text-xs font-bold uppercase tracking-wider">
-              Administration Config
-            </span>
+      <div className="lg:pl-64 flex-1 flex flex-col justify-between">
+        <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+          <div>
+            <div className="flex items-center gap-2 text-indigo-600 mb-1">
+              <Settings className="w-5 h-5" />
+              <span className="text-xs font-bold uppercase tracking-wider">
+                Administration Config
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              Campus Infrastructure Settings
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Configure approved campus facilities, issue categories, and maintenance dispatch teams.
+            </p>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            Campus Infrastructure Settings
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Configure approved campus facilities, issue categories, and maintenance dispatch teams.
-          </p>
-        </div>
 
-        <AdminNav />
+          <AdminNav />
 
-        <AdminSettingsManager
-          initialBuildings={(buildings as Building[]) || []}
-          initialCategories={(categories as Category[]) || []}
-          initialTeams={(teams as MaintenanceTeam[]) || []}
-        />
-      </main>
+          <AdminSettingsManager
+            initialBuildings={(buildings as Building[]) || []}
+            initialCategories={(categories as Category[]) || []}
+            initialTeams={(teams as MaintenanceTeam[]) || []}
+          />
+        </main>
 
-      <Footer />
+        <Footer />
+      </div>
     </div>
   );
 }

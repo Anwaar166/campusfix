@@ -2,7 +2,7 @@ import React from 'react';
 import { redirect } from 'next/navigation';
 import { getCurrentUser, getUnreadNotificationCount } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { Navbar } from '@/components/Navbar';
+import { DashboardSidebar } from '@/components/DashboardSidebar';
 import { Footer } from '@/components/Footer';
 import { NotificationsList } from '@/components/NotificationsList';
 import { NotificationItem } from '@/types/database';
@@ -27,16 +27,18 @@ export default async function NotificationsPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      <Navbar initialProfile={profile} unreadCount={unreadCount} />
+      <DashboardSidebar profile={profile} unreadCount={unreadCount} />
 
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-        <NotificationsList
-          initialNotifications={(notifications as NotificationItem[]) || []}
-          userId={user.id}
-        />
-      </main>
+      <div className="lg:pl-64 flex-1 flex flex-col justify-between">
+        <main className="max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+          <NotificationsList
+            initialNotifications={(notifications as NotificationItem[]) || []}
+            userId={user.id}
+          />
+        </main>
 
-      <Footer />
+        <Footer />
+      </div>
     </div>
   );
 }

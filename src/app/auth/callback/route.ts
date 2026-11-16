@@ -8,7 +8,8 @@ export async function GET(request: NextRequest) {
   const type = requestUrl.searchParams.get('type') as any;
   const next = requestUrl.searchParams.get('next') || '/login?verified=true';
 
-  const response = NextResponse.redirect(new URL(next, requestUrl.origin));
+  let redirectUrl = new URL(next, requestUrl.origin);
+  let response = NextResponse.redirect(redirectUrl);
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -33,14 +34,24 @@ export async function GET(request: NextRequest) {
       type,
     });
     if (!error) {
-      return NextResponse.redirect(new URL('/login?verified=true', requestUrl.origin));
+      const successUrl = new URL('/login?verified=true', requestUrl.origin);
+      const successResponse = NextResponse.redirect(successUrl);
+      response.cookies.getAll().forEach((c) => {
+        successResponse.cookies.set(c.name, c.value);
+      });
+      return successResponse;
     }
   }
 
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(new URL('/login?verified=true', requestUrl.origin));
+      const successUrl = new URL('/login?verified=true', requestUrl.origin);
+      const successResponse = NextResponse.redirect(successUrl);
+      response.cookies.getAll().forEach((c) => {
+        successResponse.cookies.set(c.name, c.value);
+      });
+      return successResponse;
     }
   }
 

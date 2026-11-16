@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Building, Category, IssueUrgency } from '@/types/database';
@@ -14,6 +14,8 @@ import {
   Flame,
   FileText,
   Sparkles,
+  Mic,
+  MicOff,
 } from 'lucide-react';
 
 interface Props {
@@ -31,6 +33,74 @@ export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
   const [urgency, setUrgency] = useState<IssueUrgency>('Medium');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Voice Speech-to-Text State (Groq Whisper)
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+
+  const startVoiceDictation = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
+
+      const recorder = new MediaRecorder(stream, {
+        mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4',
+      });
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((track) => track.stop());
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: recorder.mimeType || 'audio/webm',
+        });
+        
+        setIsTranscribing(true);
+        try {
+          const formData = new FormData();
+          formData.append('file', audioBlob, 'description.webm');
+
+          const res = await fetch('/api/ai/transcribe', {
+            method: 'POST',
+            body: formData,
+          });
+
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Failed to transcribe');
+
+          if (data.text) {
+            setDescription((prev) => (prev ? `${prev}\n${data.text}` : data.text));
+          }
+        } catch (err: any) {
+          console.error('Whisper voice dictation error:', err);
+          alert(`Voice transcription notice: ${err?.message || 'Failed to transcribe audio'}`);
+        } finally {
+          setIsTranscribing(false);
+        }
+      };
+
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setIsRecording(true);
+    } catch (err: any) {
+      console.error('Mic access error:', err);
+      alert('Could not access microphone. Please grant browser microphone permission.');
+      setIsRecording(false);
+    }
+  };
+
+  const stopVoiceDictation = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
 
   const router = useRouter();
   const supabase = createClient();
@@ -248,10 +318,37 @@ export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
 
       {/* Description */}
       <div className="space-y-1.5">
-        <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-          <FileText className="w-4 h-4 text-indigo-600" />
-          Detailed Description <span className="text-rose-500">*</span>
-        </label>
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+            <FileText className="w-4 h-4 text-[#0D9488]" />
+            Detailed Description <span className="text-rose-500">*</span>
+          </label>
+
+          <button
+            type="button"
+            onClick={isRecording ? stopVoiceDictation : startVoiceDictation}
+            disabled={isTranscribing}
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              isRecording
+                ? 'bg-rose-600 text-white animate-pulse shadow-xs'
+                : 'bg-teal-50 text-[#0D9488] border border-teal-200 hover:bg-teal-100'
+            }`}
+          >
+            {isRecording ? (
+              <>
+                <MicOff className="w-3.5 h-3.5" /> Stop Dictation
+              </>
+            ) : isTranscribing ? (
+              <>
+                <Mic className="w-3.5 h-3.5 animate-spin" /> Transcribing...
+              </>
+            ) : (
+              <>
+                <Mic className="w-3.5 h-3.5" /> Dictate with Voice (Whisper)
+              </>
+            )}
+          </button>
+        </div>
         <textarea
           rows={5}
           value={description}

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { CampusFixAI } from "@/components/CampusFixAI";
+import { AccessibilityPanel } from "@/components/AccessibilityPanel";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,6 +30,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 selection:bg-indigo-500 selection:text-white">
         {children}
         <CampusFixAI />
+        <AccessibilityPanel />
         <ScrollToTop />
       </body>
     </html>
