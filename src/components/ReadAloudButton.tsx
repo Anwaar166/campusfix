@@ -143,75 +143,47 @@ export function ReadAloudButton() {
 
   return (
     <>
-      {/* Floating Read Aloud Control (Positioned safely above Accessibility, never overlapping Logout) */}
-      <div className="fixed bottom-20 left-4 sm:left-6 lg:left-72 z-30 transition-all duration-300 font-sans print:hidden">
-        {/* Tooltip Notification */}
-        {tooltip && (
-          <div className="absolute bottom-full left-0 mb-2 w-64 p-2.5 rounded-xl bg-slate-900/95 text-white text-xs shadow-xl border border-slate-700 backdrop-blur-md animate-in fade-in slide-in-from-bottom-2">
-            <div className="flex items-start gap-1.5">
-              <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-              <span>{tooltip}</span>
-            </div>
+      {/* Toast Notification if no text selected */}
+      {tooltip && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 p-3 rounded-2xl bg-slate-900/95 text-white text-xs shadow-2xl border border-slate-700 backdrop-blur-md animate-in fade-in slide-in-from-top-2 max-w-sm">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <span>{tooltip}</span>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Control Button / Playing Toolbar */}
-        {!isPlaying ? (
+      {/* Active Playing Controls with Play/Pause & Stop (Only visible when user starts reading) */}
+      {isPlaying && (
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 p-2 bg-slate-900/95 text-white rounded-full shadow-2xl border border-slate-700/80 backdrop-blur-md animate-in fade-in zoom-in-95">
+          <div className="flex items-center gap-1.5 px-3 py-1 text-xs font-bold text-indigo-300">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>{isPaused ? 'Paused' : 'Reading Text'}</span>
+          </div>
+
+          {/* Pause / Resume button */}
           <button
-            onClick={startReading}
+            onClick={isPaused ? resumeReading : pauseReading}
             type="button"
-            aria-label="Read highlighted text aloud"
-            title="Highlight any text on the page and click to read aloud"
-            className={`group flex items-center gap-2 px-3 py-2.5 sm:px-3.5 sm:py-2.5 rounded-full text-xs font-bold shadow-lg backdrop-blur-md border transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95 ${
-              hasSelection
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-indigo-400/50 shadow-indigo-500/30 animate-pulse'
-                : 'bg-white/95 text-slate-700 hover:text-indigo-600 border-slate-200/90 shadow-slate-900/10'
-            }`}
+            aria-label={isPaused ? 'Resume reading' : 'Pause reading'}
+            title={isPaused ? 'Resume reading' : 'Pause reading'}
+            className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
           >
-            <Volume2
-              className={`w-4 h-4 ${
-                hasSelection ? 'text-white' : 'text-indigo-600 group-hover:scale-110'
-              } transition-transform`}
-            />
-            <span className="hidden sm:inline">
-              {hasSelection ? 'Read Selection' : 'Read Text'}
-            </span>
-            {hasSelection && (
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            )}
+            {isPaused ? <Play className="w-3.5 h-3.5 fill-white" /> : <Pause className="w-3.5 h-3.5" />}
           </button>
-        ) : (
-          /* Active Playing Controls with Play/Pause & Stop */
-          <div className="flex items-center gap-1.5 p-1.5 bg-slate-900/95 text-white rounded-full shadow-2xl border border-slate-700/80 backdrop-blur-md animate-in fade-in zoom-in-95">
-            <div className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-indigo-300">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>{isPaused ? 'Paused' : 'Reading'}</span>
-            </div>
 
-            {/* Pause / Resume button */}
-            <button
-              onClick={isPaused ? resumeReading : pauseReading}
-              type="button"
-              aria-label={isPaused ? 'Resume reading' : 'Pause reading'}
-              title={isPaused ? 'Resume reading' : 'Pause reading'}
-              className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
-            >
-              {isPaused ? <Play className="w-3.5 h-3.5 fill-white" /> : <Pause className="w-3.5 h-3.5" />}
-            </button>
-
-            {/* Stop button */}
-            <button
-              onClick={stopReading}
-              type="button"
-              aria-label="Stop reading"
-              title="Stop speech"
-              className="p-1.5 rounded-full bg-rose-500/80 hover:bg-rose-600 text-white transition-colors cursor-pointer"
-            >
-              <Square className="w-3 h-3 fill-white" />
-            </button>
-          </div>
-        )}
-      </div>
+          {/* Stop button */}
+          <button
+            onClick={stopReading}
+            type="button"
+            aria-label="Stop reading"
+            title="Stop speech"
+            className="p-1.5 rounded-full bg-rose-500/90 hover:bg-rose-600 text-white transition-colors cursor-pointer"
+          >
+            <Square className="w-3 h-3 fill-white" />
+          </button>
+        </div>
+      )}
     </>
   );
 }

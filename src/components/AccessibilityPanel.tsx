@@ -153,21 +153,7 @@ export function AccessibilityPanel() {
 
   return (
     <>
-      {/* Floating Accessibility Trigger Button
-          Positioned at bottom-5 left-4 on mobile, and lg:left-72 (288px) on desktop to NEVER overlap the 256px sidebar or Logout button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        aria-label="Open Accessibility Options"
-        title="Accessibility Settings (Font size, contrast, reading aloud)"
-        className="fixed bottom-5 left-4 sm:bottom-6 sm:left-6 lg:left-72 z-30 bg-white/95 backdrop-blur text-slate-700 hover:text-[#0D9488] p-2.5 sm:p-3 rounded-full shadow-lg border border-slate-200/90 hover:shadow-teal-500/20 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-2 group print:hidden"
-      >
-        <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-[#0D9488]" />
-        <span className="hidden sm:inline text-xs font-bold pr-1 text-slate-800 group-hover:text-[#0D9488]">
-          Accessibility
-        </span>
-      </button>
-
-      {/* Accessibility Modal Dialog */}
+      {/* Accessibility Modal Dialog (Opened from header nav / dashboard sidebar) */}
       {isOpen && (
         <div
           role="dialog"
