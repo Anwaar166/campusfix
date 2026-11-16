@@ -146,6 +146,25 @@ export function AdminTriagePanel({
           message: `Your report "${issue.title}" has been updated to "${status}".`,
           is_read: false,
         });
+
+        // Trigger n8n automation webhook (non-blocking)
+        fetch('/api/webhooks/n8n', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event: 'status_change',
+            data: {
+              issueId: issue.id,
+              title: issue.title,
+              oldStatus: issue.status,
+              newStatus: status,
+              urgency,
+              resolutionNotes: status === 'Resolved' ? resolutionNotes.trim() : null,
+              rejectionReason: status === 'Rejected' ? rejectionReason.trim() : null,
+              updatedBy: currentUserId,
+            },
+          }),
+        }).catch((err) => console.warn('n8n status_change dispatch error:', err));
       }
 
       // 3. Insert assignment timeline update if assigned team/user changed

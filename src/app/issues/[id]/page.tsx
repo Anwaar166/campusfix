@@ -45,6 +45,21 @@ export default async function IssueDetailPage({ params }: Props) {
   const { id } = await params;
   const { user, profile } = await getCurrentUser();
   const unreadCount = user ? await getUnreadNotificationCount(user.id) : 0;
+
+  // Server-side authentication gate
+  if (!user) {
+    const { FeedAuthGate } = await import('@/components/FeedAuthGate');
+    return (
+      <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
+        <Navbar initialProfile={profile} unreadCount={unreadCount} />
+        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex items-center justify-center">
+          <FeedAuthGate />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   const supabase = await createClient();
 
   // 1. Fetch issue details from view

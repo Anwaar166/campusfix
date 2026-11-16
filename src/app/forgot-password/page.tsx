@@ -1,51 +1,82 @@
 import React, { Suspense } from 'react';
 import Link from 'next/link';
 import { AuthForm } from '@/components/AuthForm';
-import { Wrench, KeyRound, ShieldCheck } from 'lucide-react';
+import { Wrench, ArrowLeft, KeyRound, ShieldCheck } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
   return (
-    <div className="relative min-h-screen flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-linear-to-b from-slate-900 via-indigo-950 to-slate-900 text-slate-100 overflow-hidden">
-      {/* Decorative gradient background glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-flex items-center gap-2.5 group mb-6 transition-transform hover:scale-105 duration-200">
-          <div className="w-12 h-12 rounded-2xl bg-linear-to-tr from-indigo-600 via-indigo-500 to-violet-500 flex items-center justify-center text-white shadow-xl shadow-indigo-500/30 ring-2 ring-white/20 group-hover:shadow-indigo-500/50 transition-all">
-            <Wrench className="w-6 h-6 transition-transform group-hover:rotate-12" />
-          </div>
-          <span className="font-extrabold text-3xl tracking-tight text-white drop-shadow-sm">
-            Campus<span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 to-violet-400">Fix</span>
-          </span>
+    <div className="min-h-screen lg:h-screen lg:max-h-screen bg-[#F8FAFC] flex flex-col justify-between overflow-y-auto lg:overflow-hidden">
+      {/* Top Header Bar */}
+      <header className="px-4 sm:px-8 py-3.5 flex items-center justify-between border-b border-slate-200/90 bg-white/80 backdrop-blur-md shrink-0">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-700 hover:text-[#0D9488] transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>← Back to Home</span>
         </Link>
-        
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-xs font-semibold mb-3 backdrop-blur-md">
-          <KeyRound className="w-3.5 h-3.5 text-amber-400" />
-          <span>Account Recovery</span>
-        </div>
 
-        <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-          Reset Your Password
-        </h1>
-        <p className="mt-2 text-sm text-slate-300 max-w-sm mx-auto">
-          Enter your registered university email to receive secure recovery instructions.
-        </p>
-      </div>
-
-      <div className="relative z-10 mt-8 sm:mx-auto sm:w-full sm:max-w-xl">
-        <div className="bg-white/95 backdrop-blur-xl text-slate-900 py-8 px-6 sm:px-10 shadow-2xl shadow-indigo-950/40 border border-white/40 rounded-3xl ring-1 ring-slate-900/5">
-          <Suspense fallback={<div className="text-center py-12 text-sm text-slate-400">Loading form...</div>}>
-            <AuthForm mode="forgot-password" />
-          </Suspense>
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+          <ShieldCheck className="w-4 h-4 text-[#0D9488]" />
+          <span>Campus Identity Recovery</span>
         </div>
+      </header>
 
-        <div className="mt-6 flex items-center justify-center gap-4 text-xs text-slate-400">
-          <span className="inline-flex items-center gap-1">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            Encrypted Supabase Magic Link
-          </span>
+      {/* Main 2-Column Content */}
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center w-full max-w-4xl bg-white rounded-3xl shadow-xl border border-slate-200/90 overflow-hidden">
+          {/* Left Column */}
+          <div className="lg:col-span-5 bg-[#102A43] text-white p-6 sm:p-8 flex flex-col justify-between self-stretch relative overflow-hidden">
+            <div className="space-y-4 relative z-10">
+              <Link href="/" className="inline-flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-[#0D9488] flex items-center justify-center text-white">
+                  <Wrench className="w-5 h-5" />
+                </div>
+                <span className="font-extrabold text-2xl text-white">
+                  Campus<span className="text-[#0D9488]">Fix</span>
+                </span>
+              </Link>
+
+              <div className="space-y-2">
+                <h2 className="text-xl font-black text-white">
+                  Account Recovery
+                </h2>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Enter your university email address and we will dispatch a secure password reset link to your official inbox.
+                </p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-300">
+                Reset links expire in 60 minutes for security compliance.
+              </div>
+            </div>
+
+            <div className="relative z-10 pt-4 mt-6 border-t border-slate-800 text-[11px] text-slate-400">
+              Campus Security Gateway
+            </div>
+          </div>
+
+          {/* Right Column: Form */}
+          <div className="lg:col-span-7 p-6 sm:p-8">
+            <div className="mb-4">
+              <h1 className="text-xl sm:text-2xl font-black text-[#102A43] tracking-tight">
+                Reset Your Password
+              </h1>
+              <p className="text-xs text-slate-500 mt-0.5">
+                We'll email you a secure link to choose a new password.
+              </p>
+            </div>
+
+            <Suspense fallback={<div className="text-center py-8 text-xs text-slate-400">Loading form...</div>}>
+              <AuthForm mode="forgot-password" />
+            </Suspense>
+          </div>
         </div>
-      </div>
+      </main>
+
+      <footer className="px-4 py-2.5 text-center text-[11px] text-slate-500 border-t border-slate-200/80 bg-white/60 shrink-0">
+        © {new Date().getFullYear()} CampusFix • Smart Campus Maintenance
+      </footer>
     </div>
   );
 }

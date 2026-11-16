@@ -93,6 +93,24 @@ export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
         is_read: false,
       });
 
+      // 4. Trigger n8n Automation Webhook (non-blocking)
+      fetch('/api/webhooks/n8n', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'new_issue',
+          data: {
+            issueId: newIssue.id,
+            title: newIssue.title,
+            category: newIssue.category,
+            building: newIssue.building,
+            roomLocation: newIssue.room_location,
+            urgency: newIssue.urgency,
+            createdBy: currentUserId,
+          },
+        }),
+      }).catch((err) => console.warn('n8n new_issue dispatch error:', err));
+
       router.push(`/issues/${newIssue.id}`);
       router.refresh();
     } catch (err: any) {

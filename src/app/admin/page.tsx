@@ -26,6 +26,7 @@ export default async function AdminOverviewPage() {
   const { user, profile } = await getCurrentUser();
   if (!user || (profile?.role !== 'admin' && profile?.role !== 'maintenance')) {
     redirect('/dashboard');
+    return null;
   }
 
   const unreadCount = await getUnreadNotificationCount(user.id);

@@ -12,6 +12,7 @@ export default async function ProfilePage() {
   const { user, profile } = await getCurrentUser();
   if (!user || !profile) {
     redirect('/login?redirectTo=/profile');
+    return null;
   }
 
   const unreadCount = await getUnreadNotificationCount(user.id);

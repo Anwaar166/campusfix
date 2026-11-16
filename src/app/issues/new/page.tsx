@@ -14,6 +14,7 @@ export default async function NewIssuePage() {
   const { user, profile } = await getCurrentUser();
   if (!user) {
     redirect('/login?redirectTo=/issues/new');
+    return null;
   }
 
   const unreadCount = await getUnreadNotificationCount(user.id);

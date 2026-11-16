@@ -99,16 +99,14 @@ export function UpvoteButton({
       onClick={handleToggle}
       disabled={loading}
       aria-label={hasUpvoted ? 'Remove upvote' : 'Upvote issue'}
-      className={`inline-flex items-center justify-center border transition-all duration-200 cursor-pointer ${sizeClasses} ${
-        hasUpvoted
+      className={`inline-flex items-center justify-center border transition-all duration-200 cursor-pointer ${sizeClasses} ${hasUpvoted
           ? 'bg-teal-50 border-teal-300 text-[#0D9488] shadow-xs hover:bg-teal-100 hover:scale-105 active:scale-95'
           : 'bg-white border-slate-200 text-slate-600 hover:border-teal-300 hover:bg-slate-50 hover:text-slate-900 shadow-2xs hover:scale-105 active:scale-95'
-      }`}
+        }`}
     >
       <ThumbsUp
-        className={`${iconSizes} transition-transform ${
-          hasUpvoted ? 'fill-[#0D9488] text-[#0D9488] scale-110' : 'text-slate-400 group-hover:text-slate-600'
-        }`}
+        className={`${iconSizes} transition-transform ${hasUpvoted ? 'fill-[#0D9488] text-[#0D9488] scale-110' : 'text-slate-400 group-hover:text-slate-600'
+          }`}
       />
       <span>{count}</span>
       <span className="sr-only">Upvotes</span>

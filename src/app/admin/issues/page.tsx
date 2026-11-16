@@ -30,6 +30,7 @@ export default async function AdminIssuesPage({ searchParams }: PageProps) {
   const { user, profile } = await getCurrentUser();
   if (!user || (profile?.role !== 'admin' && profile?.role !== 'maintenance')) {
     redirect('/dashboard');
+    return null;
   }
 
   const unreadCount = await getUnreadNotificationCount(user.id);
