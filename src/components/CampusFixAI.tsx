@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Bot,
   X,
@@ -22,6 +22,7 @@ import {
   Lightbulb,
   CheckCircle2,
   RefreshCw,
+  StopCircle,
 } from 'lucide-react';
 
 interface Message {
@@ -62,6 +63,18 @@ export function CampusFixAI() {
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [isAudioPaused, setIsAudioPaused] = useState(false);
   const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
+
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const [isStreaming, setIsStreaming] = useState(false);
+
+  const cancelGeneration = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setLoading(false);
+    setIsStreaming(false);
+  }, []);
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -300,13 +313,14 @@ export function CampusFixAI() {
   };
 
   // -------------------------------------------------------------
-  // SEND MESSAGE: Connects to /api/ai/chat
+  // SEND MESSAGE: Connects to /api/ai/chat with progressive streaming
   // -------------------------------------------------------------
   const handleSendMessage = async (textToSend?: string) => {
     const query = (textToSend || input).trim();
     if (!query || loading) return;
 
     stopAudio();
+    cancelGeneration();
 
     const userMsg: Message = {
       id: Date.now().toString(),
@@ -315,64 +329,172 @@ export function CampusFixAI() {
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    const aiMsgId = (Date.now() + 1).toString();
+    const initialAiMsg: Message = {
+      id: aiMsgId,
+      sender: 'ai',
+      text: '', // Start empty to show typing indicator
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      provider,
+      model: provider === 'gemini' ? 'gemini-4-hydrogen' : 'openai/gpt-oss-120b',
+    };
+
+    setMessages((prev) => [...prev, userMsg, initialAiMsg]);
     setInput('');
     setLoading(true);
+    setIsStreaming(true);
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     try {
-      const history = messages.map((m) => ({
-        role: m.sender === 'user' ? ('user' as const) : ('assistant' as const),
-        content: m.text,
-      }));
+      const history = messages
+        .filter((m) => m.id !== 'welcome' && m.id !== 'reset')
+        .map((m) => ({
+          role: m.sender === 'user' ? ('user' as const) : ('assistant' as const),
+          content: m.text,
+        }));
       history.push({ role: 'user', content: query });
 
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           messages: history,
           provider,
           language,
+          stream: true,
         }),
       });
 
-      const data = await res.json();
-      const replyText = data.reply || data.error || 'No response returned.';
-      const newMsgId = (Date.now() + 1).toString();
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || errorData.reply || `Request failed (${res.status})`);
+      }
 
-      const aiReply: Message = {
-        id: newMsgId,
-        sender: 'ai',
-        text: replyText,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        provider: data.provider,
-        model: data.model,
-      };
+      const contentType = res.headers.get('content-type') || '';
+      let accumulatedText = '';
+      let detectedModel = provider === 'gemini' ? 'gemini-4-hydrogen' : 'openai/gpt-oss-120b';
+      let detectedProvider: string = provider;
 
-      setMessages((prev) => [...prev, aiReply]);
+      // Handle NDJSON stream
+      if (contentType.includes('application/x-ndjson') && res.body) {
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let buffer = '';
 
-      // If Voice Mode is active and message succeeded, speak automatically
-      if (isVoiceMode && replyText) {
-        setTimeout(() => playSpeech(newMsgId, replyText), 200);
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+            try {
+              const event = JSON.parse(trimmed);
+              if (event.type === 'meta') {
+                if (event.model) detectedModel = event.model;
+                if (event.provider) detectedProvider = event.provider;
+              } else if (event.type === 'delta' && typeof event.text === 'string') {
+                accumulatedText += event.text;
+                const currentText = accumulatedText;
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === aiMsgId
+                      ? { ...msg, text: currentText, model: detectedModel, provider: detectedProvider }
+                      : msg
+                  )
+                );
+              } else if (event.type === 'done') {
+                if (event.model) detectedModel = event.model;
+                if (event.provider) detectedProvider = event.provider;
+              } else if (event.type === 'error') {
+                accumulatedText = event.message || 'Stream encountered an error.';
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === aiMsgId
+                      ? { ...msg, text: accumulatedText, model: detectedModel, provider: detectedProvider }
+                      : msg
+                  )
+                );
+              }
+            } catch {
+              // Ignore partial JSON parse errors
+            }
+          }
+        }
+      } else {
+        // Fallback for standard JSON response
+        const data = await res.json();
+        accumulatedText = data.reply || data.error || 'No response returned.';
+        if (data.model) detectedModel = data.model;
+        if (data.provider) detectedProvider = data.provider;
+
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === aiMsgId
+              ? { ...msg, text: accumulatedText, model: detectedModel, provider: detectedProvider }
+              : msg
+          )
+        );
+      }
+
+      if (!accumulatedText.trim()) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === aiMsgId
+              ? {
+                  ...msg,
+                  text: '⚠️ No response was received. Please try again.',
+                  model: detectedModel,
+                  provider: detectedProvider,
+                }
+              : msg
+          )
+        );
+      } else if (isVoiceMode) {
+        setTimeout(() => playSpeech(aiMsgId, accumulatedText), 200);
       }
     } catch (err: any) {
-      console.error('Chat error:', err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          sender: 'ai',
-          text: `⚠️ **Connection Error**: ${err?.message || 'Could not communicate with the AI Assistant. Please check your network and try again.'}`,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        },
-      ]);
+      if (err.name === 'AbortError') {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === aiMsgId
+              ? {
+                  ...msg,
+                  text: msg.text ? `${msg.text}\n\n*(Generation stopped)*` : '*(Generation cancelled)*',
+                }
+              : msg
+          )
+        );
+      } else {
+        console.error('Chat error:', err);
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === aiMsgId
+              ? {
+                  ...msg,
+                  text: `⚠️ **Connection Error**: ${err?.message || 'Could not communicate with the AI Assistant. Please check your network and try again.'}`,
+                }
+              : msg
+          )
+        );
+      }
     } finally {
       setLoading(false);
+      setIsStreaming(false);
+      abortControllerRef.current = null;
     }
   };
 
   const handleClear = () => {
     stopAudio();
+    cancelGeneration();
     setMessages([
       {
         id: 'reset',
@@ -534,6 +656,7 @@ export function CampusFixAI() {
               <button
                 onClick={() => {
                   stopAudio();
+                  cancelGeneration();
                   setIsOpen(false);
                 }}
                 title="Close"
@@ -596,7 +719,18 @@ export function CampusFixAI() {
                       }`}
                     >
                       {msg.sender === 'ai' ? (
-                        renderMessageText(msg.text)
+                        msg.text ? (
+                          renderMessageText(msg.text)
+                        ) : (
+                          <div className="flex items-center gap-1.5 py-1 text-xs text-slate-500">
+                            <span className="w-2 h-2 rounded-full bg-teal-500 animate-bounce [animation-delay:-0.3s]" />
+                            <span className="w-2 h-2 rounded-full bg-teal-500 animate-bounce [animation-delay:-0.15s]" />
+                            <span className="w-2 h-2 rounded-full bg-teal-500 animate-bounce" />
+                            <span className="ml-1 text-[11px] text-slate-400">
+                              Streaming {provider === 'gemini' ? 'Gemini 4 Hydrogen' : 'Groq 120B'}...
+                            </span>
+                          </div>
+                        )
                       ) : (
                         <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
                       )}
@@ -651,10 +785,10 @@ export function CampusFixAI() {
                   </div>
                 ))}
 
-                {loading && (
+                {loading && !messages.some((m) => m.sender === 'ai' && m.text === '') && (
                   <div className="flex items-center gap-2 p-3 bg-white rounded-2xl border border-slate-200 text-xs text-slate-600 max-w-[70%]">
                     <RefreshCw className="w-3.5 h-3.5 animate-spin text-teal-600" />
-                    <span>Thinking with {provider === 'gemini' ? 'Gemini 4 Hydrogen' : 'Groq 120B'}...</span>
+                    <span>Streaming {provider === 'gemini' ? 'Gemini 4 Hydrogen' : 'Groq 120B'}...</span>
                   </div>
                 )}
 
@@ -743,14 +877,26 @@ export function CampusFixAI() {
                   className="flex-1 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all disabled:opacity-50"
                 />
 
-                <button
-                  type="submit"
-                  disabled={!input.trim() || loading || isRecording}
-                  aria-label="Send message to AI"
-                  className="bg-[#0D9488] hover:bg-teal-700 disabled:bg-slate-300 text-white p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center cursor-pointer disabled:cursor-not-allowed active:scale-95 shrink-0"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
+                {loading ? (
+                  <button
+                    type="button"
+                    onClick={cancelGeneration}
+                    title="Stop generating"
+                    aria-label="Stop generation"
+                    className="bg-rose-500 hover:bg-rose-600 text-white p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center cursor-pointer active:scale-95 shrink-0"
+                  >
+                    <StopCircle className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={!input.trim() || isRecording}
+                    aria-label="Send message to AI"
+                    className="bg-[#0D9488] hover:bg-teal-700 disabled:bg-slate-300 text-white p-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center cursor-pointer disabled:cursor-not-allowed active:scale-95 shrink-0"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                )}
               </form>
             </>
           )}
