@@ -20,8 +20,8 @@ interface Props {
 declare global {
   interface Window {
     grecaptcha?: {
-      ready: (callback: () => void) => void;
-      render: (
+      ready?: (callback: () => void) => void;
+      render?: (
         container: HTMLElement | string,
         parameters: {
           sitekey: string;
@@ -33,8 +33,8 @@ declare global {
           'error-callback'?: (err?: any) => void;
         }
       ) => number;
-      reset: (widgetId?: number) => void;
-      getResponse: (widgetId?: number) => string;
+      reset?: (widgetId?: number) => void;
+      getResponse?: (widgetId?: number) => string;
     };
     onGoogleRecaptchaLoad?: () => void;
   }
@@ -42,7 +42,7 @@ declare global {
 
 export const GoogleRecaptcha = forwardRef<GoogleRecaptchaRef, Props>(
   ({ onVerify, onExpire, onError, theme = 'light', className = '' }, ref) => {
-    const { language, t } = useTranslation();
+    const { language } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
     const widgetIdRef = useRef<number | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -54,7 +54,7 @@ export const GoogleRecaptcha = forwardRef<GoogleRecaptchaRef, Props>(
     // Expose reset and getResponse methods to parent forms
     useImperativeHandle(ref, () => ({
       reset: () => {
-        if (widgetIdRef.current !== null && typeof window !== 'undefined' && window.grecaptcha) {
+        if (widgetIdRef.current !== null && typeof window !== 'undefined' && window.grecaptcha?.reset) {
           try {
             window.grecaptcha.reset(widgetIdRef.current);
           } catch (e) {
@@ -63,7 +63,7 @@ export const GoogleRecaptcha = forwardRef<GoogleRecaptchaRef, Props>(
         }
       },
       getResponse: () => {
-        if (widgetIdRef.current !== null && typeof window !== 'undefined' && window.grecaptcha) {
+        if (widgetIdRef.current !== null && typeof window !== 'undefined' && window.grecaptcha?.getResponse) {
           try {
             return window.grecaptcha.getResponse(widgetIdRef.current);
           } catch {
@@ -78,7 +78,7 @@ export const GoogleRecaptcha = forwardRef<GoogleRecaptchaRef, Props>(
       let isMounted = true;
 
       const renderWidget = () => {
-        if (!isMounted || !containerRef.current || !window.grecaptcha || widgetIdRef.current !== null) {
+        if (!isMounted || !containerRef.current || !window.grecaptcha?.render || widgetIdRef.current !== null) {
           return;
         }
 
@@ -127,7 +127,7 @@ export const GoogleRecaptcha = forwardRef<GoogleRecaptchaRef, Props>(
         let script = document.getElementById(scriptId) as HTMLScriptElement | null;
 
         window.onGoogleRecaptchaLoad = () => {
-          if (isMounted && window.grecaptcha) {
+          if (isMounted && typeof window.grecaptcha?.ready === 'function') {
             window.grecaptcha.ready(renderWidget);
           }
         };
@@ -139,12 +139,12 @@ export const GoogleRecaptcha = forwardRef<GoogleRecaptchaRef, Props>(
           script.async = true;
           script.defer = true;
           document.head.appendChild(script);
-        } else if (window.grecaptcha && window.grecaptcha.render) {
+        } else if (typeof window.grecaptcha?.render === 'function' && typeof window.grecaptcha?.ready === 'function') {
           window.grecaptcha.ready(renderWidget);
         } else {
           // If script tag exists but grecaptcha not yet ready, poll briefly
           const interval = setInterval(() => {
-            if (window.grecaptcha && window.grecaptcha.render && containerRef.current) {
+            if (typeof window.grecaptcha?.render === 'function' && typeof window.grecaptcha?.ready === 'function' && containerRef.current) {
               clearInterval(interval);
               window.grecaptcha.ready(renderWidget);
             }
