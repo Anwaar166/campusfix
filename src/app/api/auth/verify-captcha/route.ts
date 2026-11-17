@@ -7,17 +7,68 @@ export async function POST(req: NextRequest) {
 
     if (!token || typeof token !== 'string' || token.trim().length === 0) {
       return NextResponse.json(
-        { success: false, error: 'Please complete the security verification before submitting.' },
+        { success: false, error: 'Please complete the Google reCAPTCHA verification before submitting.' },
         { status: 400 }
       );
     }
 
-    const secretKey = process.env.TURNSTILE_SECRET_KEY;
+    // 1. Google reCAPTCHA Verification (using RECAPTCHA_SECRET_KEY from .env.local)
+    const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
 
-    // If a production Cloudflare Turnstile Secret Key is configured, verify with Cloudflare API
-    if (secretKey && secretKey !== 'your_secret_key' && !secretKey.startsWith('1x000')) {
+    if (recaptchaSecret && recaptchaSecret !== 'your_secret_key') {
       const formData = new URLSearchParams();
-      formData.append('secret', secretKey);
+      formData.append('secret', recaptchaSecret);
+      formData.append('response', token);
+
+      const clientIp = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
+      if (clientIp) {
+        formData.append('remoteip', clientIp.split(',')[0].trim());
+      }
+
+      const googleRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+      });
+
+      const data = await googleRes.json();
+
+      if (!data.success) {
+        console.warn('Google reCAPTCHA rejected token:', data['error-codes']);
+        const errorCodes: string[] = data['error-codes'] || [];
+
+        let userError = 'Google reCAPTCHA verification failed. Please try again.';
+        if (errorCodes.includes('timeout-or-duplicate')) {
+          userError = 'reCAPTCHA expired or was already used. Please click the checkbox again.';
+        } else if (errorCodes.includes('invalid-input-response')) {
+          userError = 'Invalid reCAPTCHA response token. Please click the checkbox again.';
+        }
+
+        return NextResponse.json(
+          {
+            success: false,
+            error: userError,
+            errorCodes,
+          },
+          { status: 400 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        verifiedBy: 'google_recaptcha',
+        challenge_ts: data.challenge_ts,
+        hostname: data.hostname,
+      });
+    }
+
+    // 2. Secondary fallback: Cloudflare Turnstile if configured
+    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+    if (turnstileSecret && turnstileSecret !== 'your_secret_key' && !turnstileSecret.startsWith('1x000')) {
+      const formData = new URLSearchParams();
+      formData.append('secret', turnstileSecret);
       formData.append('response', token);
 
       const clientIp = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
@@ -43,7 +94,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             success: false,
-            error: 'Security challenge failed. Please click the checkbox to verify again.',
+            error: 'Security challenge failed. Please verify again.',
             errorCodes: data['error-codes'],
           },
           { status: 400 }
@@ -57,8 +108,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Fallback: If Turnstile secret key is not yet added to Vercel production variables,
-    // or during development/testing, validate the interactive challenge token so authentication succeeds.
+    // 3. Development / Test Fallback
     if (token.length >= 8) {
       return NextResponse.json({
         success: true,
@@ -72,9 +122,9 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   } catch (error: any) {
-    console.error('Turnstile verification error:', error);
+    console.error('CAPTCHA verification error:', error);
     return NextResponse.json(
-      { success: false, error: 'Server error processing security verification.' },
+      { success: false, error: 'Server error processing CAPTCHA verification.' },
       { status: 500 }
     );
   }

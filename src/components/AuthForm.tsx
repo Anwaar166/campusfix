@@ -7,7 +7,7 @@ import { useTranslation } from '@/lib/i18n/LanguageContext';
 import { createClient } from '@/lib/supabase/client';
 import { UserRole } from '@/types/database';
 import { QuickDemoLogin } from './QuickDemoLogin';
-import { TurnstileWidget, TurnstileWidgetRef } from './TurnstileWidget';
+import { GoogleRecaptcha, GoogleRecaptchaRef } from './GoogleRecaptcha';
 import {
   Mail,
   Lock,
@@ -47,9 +47,9 @@ export function AuthForm({ mode }: Props) {
   const [role, setRole] = useState<'student' | 'faculty'>('student');
   const [portalPref, setPortalPref] = useState<'student' | 'faculty' | 'admin'>('student');
 
-  // Security CAPTCHA State
+  // Security CAPTCHA State (Google reCAPTCHA)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const turnstileRef = useRef<TurnstileWidgetRef>(null);
+  const recaptchaRef = useRef<GoogleRecaptchaRef>(null);
 
   // UI state
   const [showPassword, setShowPassword] = useState(false);
@@ -103,10 +103,14 @@ export function AuthForm({ mode }: Props) {
     setUnverifiedEmail(null);
 
     try {
-      // 1. CAPTCHA verification on Login and Registration
+      // 1. Google reCAPTCHA verification on Login and Registration
       if (mode === 'login' || mode === 'signup') {
         if (!captchaToken) {
-          throw new Error('Please complete the security verification challenge before continuing.');
+          throw new Error(
+            language === 'ur'
+              ? 'براہ کرم آگے بڑھنے سے پہلے گوگل کیپچا کی تصدیق مکمل کریں۔'
+              : 'Please complete the Google reCAPTCHA verification before continuing.'
+          );
         }
 
         const captchaRes = await fetch('/api/auth/verify-captcha', {
@@ -117,9 +121,14 @@ export function AuthForm({ mode }: Props) {
 
         const captchaData = await captchaRes.json();
         if (!captchaRes.ok || !captchaData.success) {
-          turnstileRef.current?.reset();
+          recaptchaRef.current?.reset();
           setCaptchaToken(null);
-          throw new Error(captchaData.error || 'Security verification failed. Please complete the CAPTCHA again.');
+          throw new Error(
+            captchaData.error ||
+              (language === 'ur'
+                ? 'گوگل کیپچا کی تصدیق ناکام ہو گئی۔ براہ کرم دوبارہ کوشش کریں۔'
+                : 'Google reCAPTCHA verification failed. Please try again.')
+          );
         }
       }
 
@@ -215,7 +224,7 @@ export function AuthForm({ mode }: Props) {
       console.error('Auth action error:', err);
       setErrorMsg(err.message || 'Authentication failed. Please verify your credentials.');
       // Reset CAPTCHA on error so user can retry
-      turnstileRef.current?.reset();
+      recaptchaRef.current?.reset();
       setCaptchaToken(null);
     } finally {
       setLoading(false);
@@ -464,10 +473,10 @@ export function AuthForm({ mode }: Props) {
           </div>
         )}
 
-        {/* CLOUDFLARE TURNSTILE CAPTCHA (LOGIN & SIGNUP) */}
+        {/* GOOGLE RECAPTCHA (LOGIN & SIGNUP) */}
         {mode !== 'forgot-password' && (
-          <TurnstileWidget
-            ref={turnstileRef}
+          <GoogleRecaptcha
+            ref={recaptchaRef}
             onVerify={(tok) => setCaptchaToken(tok)}
             onExpire={() => setCaptchaToken(null)}
             onError={() => setCaptchaToken(null)}
