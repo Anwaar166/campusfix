@@ -120,103 +120,103 @@ export default async function DashboardPage() {
             </Link>
           </div>
 
-            {/* 4 KPI Cards Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Card 1: Total */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
-                <div className="text-slate-500 text-xs font-bold flex items-center justify-between">
-                  <span>{t('dashboard.reported_by_you', 'My Reports')}</span>
-                  <User className="w-4 h-4 text-indigo-500" />
-                </div>
-                <div className="text-3xl font-black text-[#102A43]">{totalMyReports}</div>
-                <div className="text-[11px] text-slate-400">{lang === 'ur' ? 'کل شکایات' : 'Total submitted'}</div>
+          {/* 4 KPI Cards Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Card 1: Total */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
+              <div className="text-slate-500 text-xs font-bold flex items-center justify-between">
+                <span>{t('dashboard.reported_by_you', 'My Reports')}</span>
+                <User className="w-4 h-4 text-indigo-500" />
               </div>
-
-              {/* Card 2: Open */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
-                <div className="text-slate-500 text-xs font-bold flex items-center justify-between">
-                  <span>{t('dashboard.pending_review', 'Open Tickets')}</span>
-                  <Clock className="w-4 h-4 text-sky-500" />
-                </div>
-                <div className="text-3xl font-black text-sky-600">{myOpenReports}</div>
-                <div className="text-[11px] text-slate-400">{lang === 'ur' ? 'زیرِ جائزہ' : 'Under review'}</div>
-              </div>
-
-              {/* Card 3: In Progress */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
-                <div className="text-slate-500 text-xs font-bold flex items-center justify-between">
-                  <span>{t('dashboard.in_progress', 'In Progress')}</span>
-                  <Wrench className="w-4 h-4 text-amber-500" />
-                </div>
-                <div className="text-3xl font-black text-amber-600">{myInProgress}</div>
-                <div className="text-[11px] text-slate-400">{lang === 'ur' ? 'ٹیکنیشن فعال' : 'Technician active'}</div>
-              </div>
-
-              {/* Card 4: Resolved */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
-                <div className="text-slate-500 text-xs font-bold flex items-center justify-between">
-                  <span>{t('dashboard.resolved', 'Resolved')}</span>
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                </div>
-                <div className="text-3xl font-black text-emerald-600">{myResolved}</div>
-                <div className="text-[11px] text-slate-400">{lang === 'ur' ? 'مکمل و تصدیق شدہ' : 'Verified & closed'}</div>
-              </div>
+              <div className="text-3xl font-black text-[#102A43]">{totalMyReports}</div>
+              <div className="text-[11px] text-slate-400">{lang === 'ur' ? 'کل شکایات' : 'Total submitted'}</div>
             </div>
 
-            {/* My Reported Issues */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-black text-[#102A43]">
-                    {t('issues.my_complaints_title', 'My Reported Issues')}
-                  </h2>
-                  <p className="text-xs text-slate-500">
-                    {lang === 'ur'
-                      ? 'آپ کی جمع کروائی گئی شکایات کی موجودہ صورتحال اور پیش رفت۔'
-                      : 'Live status and updates for your submitted campus tickets.'}
-                  </p>
-                </div>
-                {totalMyReports > 0 && (
-                  <Link
-                    href="/my-issues"
-                    className="text-xs font-bold text-[#0D9488] hover:underline flex items-center gap-1"
-                  >
-                    <span>{lang === 'ur' ? `تمام دیکھیں (${totalMyReports})` : `View all (${totalMyReports})`}</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                )}
+            {/* Card 2: Open */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
+              <div className="text-slate-500 text-xs font-bold flex items-center justify-between">
+                <span>{t('dashboard.pending_review', 'Open Tickets')}</span>
+                <Clock className="w-4 h-4 text-sky-500" />
               </div>
+              <div className="text-3xl font-black text-sky-600">{myOpenReports}</div>
+              <div className="text-[11px] text-slate-400">{lang === 'ur' ? 'زیرِ جائزہ' : 'Under review'}</div>
+            </div>
 
-              {!myIssues || myIssues.length === 0 ? (
-                <div className="bg-white rounded-3xl p-8 sm:p-10 text-center border border-slate-200/90 space-y-3">
-                  <Inbox className="w-10 h-10 text-slate-400 mx-auto" />
-                  <div className="space-y-1">
-                    <h3 className="font-bold text-sm text-[#102A43]">{t('dashboard.no_issues_found', "You haven't reported any issues yet")}</h3>
-                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                      {t('dashboard.no_issues_desc', 'Notice a broken desk, flickering light, or HVAC issue on campus? Submit a quick report to dispatch facilities crews.')}
-                    </p>
-                  </div>
-                  <Link
-                    href="/issues/new"
-                    className="inline-flex items-center gap-2 bg-[#0D9488] hover:bg-[#0f766e] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all"
-                  >
-                    <PlusCircle className="w-4 h-4" />
-                    <span>{t('dashboard.report_new_issue', 'Report Your First Issue')}</span>
-                  </Link>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 gap-3.5">
-                  {myIssues.slice(0, 3).map((issue) => (
-                    <IssueCard
-                      key={issue.id}
-                      issue={issue}
-                      currentUserId={user.id}
-                      hasUpvoted={userUpvotedIds.has(issue.id)}
-                    />
-                  ))}
-                </div>
+            {/* Card 3: In Progress */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
+              <div className="text-slate-500 text-xs font-bold flex items-center justify-between">
+                <span>{t('dashboard.in_progress', 'In Progress')}</span>
+                <Wrench className="w-4 h-4 text-amber-500" />
+              </div>
+              <div className="text-3xl font-black text-amber-600">{myInProgress}</div>
+              <div className="text-[11px] text-slate-400">{lang === 'ur' ? 'ٹیکنیشن فعال' : 'Technician active'}</div>
+            </div>
+
+            {/* Card 4: Resolved */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
+              <div className="text-slate-500 text-xs font-bold flex items-center justify-between">
+                <span>{t('dashboard.resolved', 'Resolved')}</span>
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              </div>
+              <div className="text-3xl font-black text-emerald-600">{myResolved}</div>
+              <div className="text-[11px] text-slate-400">{lang === 'ur' ? 'مکمل و تصدیق شدہ' : 'Verified & closed'}</div>
+            </div>
+          </div>
+
+          {/* My Reported Issues */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-black text-[#102A43]">
+                  {t('issues.my_complaints_title', 'My Reported Issues')}
+                </h2>
+                <p className="text-xs text-slate-500">
+                  {lang === 'ur'
+                    ? 'آپ کی جمع کروائی گئی شکایات کی موجودہ صورتحال اور پیش رفت۔'
+                    : 'Live status and updates for your submitted campus tickets.'}
+                </p>
+              </div>
+              {totalMyReports > 0 && (
+                <Link
+                  href="/my-issues"
+                  className="text-xs font-bold text-[#0D9488] hover:underline flex items-center gap-1"
+                >
+                  <span>{lang === 'ur' ? `تمام دیکھیں (${totalMyReports})` : `View all (${totalMyReports})`}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
               )}
             </div>
+
+            {!myIssues || myIssues.length === 0 ? (
+              <div className="bg-white rounded-3xl p-8 sm:p-10 text-center border border-slate-200/90 space-y-3">
+                <Inbox className="w-10 h-10 text-slate-400 mx-auto" />
+                <div className="space-y-1">
+                  <h3 className="font-bold text-sm text-[#102A43]">{t('dashboard.no_issues_found', "You haven't reported any issues yet")}</h3>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                    {t('dashboard.no_issues_desc', 'Notice a broken desk, flickering light, or HVAC issue on campus? Submit a quick report to dispatch facilities crews.')}
+                  </p>
+                </div>
+                <Link
+                  href="/issues/new"
+                  className="inline-flex items-center gap-2 bg-[#0D9488] hover:bg-[#0f766e] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>{t('dashboard.report_new_issue', 'Report Your First Issue')}</span>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-3.5">
+                {myIssues.slice(0, 3).map((issue) => (
+                  <IssueCard
+                    key={issue.id}
+                    issue={issue}
+                    currentUserId={user.id}
+                    hasUpvoted={userUpvotedIds.has(issue.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Trending Campus Issues */}
           {trendingIssues && trendingIssues.length > 0 && (
@@ -225,11 +225,11 @@ export default async function DashboardPage() {
                 <div className="flex items-center gap-2">
                   <ThumbsUp className="w-4 h-4 text-amber-500" />
                   <h3 className="font-bold text-sm text-[#102A43]">
-                    Trending Campus Issues (Community Priority)
+                    {lang === 'ur' ? 'جامعہ میں سب سے زیادہ زیرِ بحث مسائل' : 'Trending Campus Issues (Community Priority)'}
                   </h3>
                 </div>
                 <Link href="/issues?sort=upvotes" className="text-xs font-bold text-[#0D9488] hover:underline">
-                  View Trending Feed →
+                  {lang === 'ur' ? 'ٹرینڈنگ فیڈ دیکھیں ←' : 'View Trending Feed →'}
                 </Link>
               </div>
 
