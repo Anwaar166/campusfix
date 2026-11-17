@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  ...(process.env.VERCEL ? {} : { distDir: "build" }),
+  webpack: (config) => {
+    config.resolve.symlinks = false;
+    return config;
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },

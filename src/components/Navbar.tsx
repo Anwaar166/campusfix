@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { Profile } from '@/types/database';
+import { useTranslation } from '@/lib/i18n/LanguageContext';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 interface Props {
   initialProfile: Profile | null;
@@ -32,6 +34,7 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const { t, isRTL } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
@@ -55,10 +58,10 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
               </div>
               <div className="flex flex-col">
                 <span className="font-extrabold text-xl tracking-tight text-[#102A43] group-hover:text-[#0D9488] transition-colors">
-                  Campus<span className="text-[#0D9488]">Fix</span>
+                  {isRTL ? 'کیمپس' : 'Campus'}<span className="text-[#0D9488]">{isRTL ? ' فکس' : 'Fix'}</span>
                 </span>
                 <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 -mt-1">
-                  Smart Maintenance
+                  {t('nav.tagline', 'Smart Maintenance')}
                 </span>
               </div>
             </Link>
@@ -74,7 +77,7 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
                   : 'hover:text-[#102A43] hover:bg-slate-50'
               }`}
             >
-              Home
+              {t('nav.home', 'Home')}
             </Link>
             <Link
               href="/issues"
@@ -85,29 +88,23 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
               }`}
             >
               <Compass className="w-4 h-4 text-slate-400" />
-              Campus Feed
-            </Link>
-            <Link
-              href="/#how-it-works"
-              className="px-3 py-2 rounded-lg hover:text-[#102A43] hover:bg-slate-50 transition-colors"
-            >
-              How It Works
+              {t('nav.campus_feed', 'Campus Feed')}
             </Link>
             <Link
               href="/#features"
               className="px-3 py-2 rounded-lg hover:text-[#102A43] hover:bg-slate-50 transition-colors"
             >
-              Features
+              {t('nav.features', 'Features')}
             </Link>
             <Link
               href="/#about"
               className="px-3 py-2 rounded-lg hover:text-[#102A43] hover:bg-slate-50 transition-colors"
             >
-              About
+              {t('nav.about', 'About')}
             </Link>
 
-            {/* Grouped Accessibility & Read Text Controls (Related Bordered Look) */}
-            <div className="flex items-center ml-1 border border-slate-300/80 rounded-xl bg-slate-50/90 p-0.5 shadow-2xs hover:border-teal-500/50 transition-colors">
+            {/* Grouped Accessibility & Read Text Controls */}
+            <div className="flex items-center mx-1 border border-slate-300/80 rounded-xl bg-slate-50/90 p-0.5 shadow-2xs hover:border-teal-500/50 transition-colors">
               <button
                 type="button"
                 onClick={() => {
@@ -116,11 +113,11 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
                   }
                 }}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:text-[#0D9488] hover:bg-white transition-all cursor-pointer"
-                title="Accessibility & Display Settings"
-                aria-label="Open Accessibility options"
+                title={t('common.accessibility', 'Accessibility')}
+                aria-label={t('common.accessibility', 'Accessibility')}
               >
                 <Eye className="w-3.5 h-3.5 text-[#0D9488]" />
-                <span>Accessibility</span>
+                <span>{t('common.accessibility', 'Accessibility')}</span>
               </button>
               <div className="w-px h-4 bg-slate-300" />
               <button
@@ -131,28 +128,26 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
                   }
                 }}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:text-indigo-600 hover:bg-white transition-all cursor-pointer"
-                title="Read Highlighted Text Aloud"
-                aria-label="Read highlighted text aloud"
+                title={t('common.read_aloud', 'Read Text')}
+                aria-label={t('common.read_aloud', 'Read Text')}
               >
                 <Volume2 className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Read Text</span>
+                <span>{t('common.read_aloud', 'Read Text')}</span>
               </button>
             </div>
 
             {initialProfile && (
-              <>
-                <Link
-                  href="/dashboard"
-                  className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5 ${
-                    pathname === '/dashboard'
-                      ? 'text-[#102A43] font-bold bg-slate-100'
-                      : 'hover:text-[#102A43] hover:bg-slate-50'
-                  }`}
-                >
-                  <LayoutDashboard className="w-4 h-4 text-slate-400" />
-                  Dashboard
-                </Link>
-              </>
+              <Link
+                href="/dashboard"
+                className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5 ${
+                  pathname === '/dashboard'
+                    ? 'text-[#102A43] font-bold bg-slate-100'
+                    : 'hover:text-[#102A43] hover:bg-slate-50'
+                }`}
+              >
+                <LayoutDashboard className="w-4 h-4 text-slate-400" />
+                {t('nav.dashboard', 'Dashboard')}
+              </Link>
             )}
 
             {isAdminOrStaff && (
@@ -165,13 +160,15 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
                 }`}
               >
                 <ShieldAlert className="w-4 h-4 text-amber-500" />
-                Admin Center
+                {t('nav.admin_portal', 'Admin Center')}
               </Link>
             )}
           </nav>
 
-          {/* Right Action buttons */}
+          {/* Right Action buttons & Language Switcher */}
           <div className="hidden md:flex items-center gap-3">
+            <LanguageSwitcher />
+
             {initialProfile ? (
               <div className="flex items-center gap-3">
                 <Link
@@ -179,7 +176,7 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
                   className="inline-flex items-center gap-1.5 bg-[#0D9488] hover:bg-[#0f766e] text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-xs hover:shadow-md hover:shadow-teal-500/20 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
                 >
                   <PlusCircle className="w-4 h-4" />
-                  Report Issue
+                  {t('nav.report_issue', 'Report Issue')}
                 </Link>
 
                 {/* Notifications Bell */}
@@ -211,13 +208,13 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
                         {initialProfile.full_name?.split(' ')[0] || 'User'}
                       </div>
                       <div className="text-[10px] uppercase font-semibold text-[#0D9488]">
-                        {initialProfile.role}
+                        {t(`roles.${initialProfile.role}`, initialProfile.role)}
                       </div>
                     </div>
                   </button>
 
                   {userDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95">
+                    <div className="absolute right-0 rtl:right-auto rtl:left-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95">
                       <div className="px-4 py-2.5 border-b border-slate-100">
                         <p className="text-xs font-bold text-slate-900">{initialProfile.full_name}</p>
                         <p className="text-[11px] text-slate-500 capitalize">{initialProfile.department || 'Campus Member'}</p>
@@ -228,7 +225,7 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
                         className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
                       >
                         <LayoutDashboard className="w-4 h-4 text-slate-400" />
-                        Dashboard
+                        {t('nav.dashboard', 'Dashboard')}
                       </Link>
                       <Link
                         href="/my-issues"
@@ -236,7 +233,7 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
                         className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
                       >
                         <Building2 className="w-4 h-4 text-slate-400" />
-                        My Reported Issues
+                        {t('nav.my_complaints', 'My Reported Issues')}
                       </Link>
                       <Link
                         href="/profile"
@@ -244,15 +241,15 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
                         className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
                       >
                         <User className="w-4 h-4 text-slate-400" />
-                        Profile Settings
+                        {t('common.details', 'Profile Settings')}
                       </Link>
                       <div className="border-t border-slate-100 my-1" />
                       <button
                         onClick={handleSignOut}
-                        className="w-full flex items-center gap-2 px-4 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 transition-colors text-left"
+                        className="w-full flex items-center gap-2 px-4 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 transition-colors text-left rtl:text-right"
                       >
                         <LogOut className="w-4 h-4" />
-                        Sign Out
+                        {t('nav.sign_out', 'Sign Out')}
                       </button>
                     </div>
                   )}
@@ -264,14 +261,14 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
                   href="/login"
                   className="px-4 py-2 text-sm font-semibold text-[#102A43] hover:text-[#0D9488] transition-colors"
                 >
-                  Sign In
+                  {t('nav.sign_in', 'Sign In')}
                 </Link>
                 <Link
                   href="/issues/new"
                   className="inline-flex items-center gap-1.5 bg-[#0D9488] hover:bg-[#0f766e] text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-xs hover:shadow-md hover:shadow-teal-500/20 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
                 >
-                  Get Started
-                  <ArrowRight className="w-4 h-4" />
+                  {t('nav.sign_up', 'Get Started')}
+                  <ArrowRight className="w-4 h-4 rtl:rotate-180" />
                 </Link>
               </div>
             )}
@@ -306,43 +303,41 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden border-b border-slate-200 bg-white px-4 pt-2 pb-6 space-y-2 animate-in slide-in-from-top-2">
+          {/* Mobile Language Switcher */}
+          <div className="flex justify-center py-1">
+            <LanguageSwitcher />
+          </div>
+
           <Link
             href="/"
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
-            Home
+            {t('nav.home', 'Home')}
           </Link>
           <Link
             href="/issues"
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
-            Campus Feed
-          </Link>
-          <Link
-            href="/#how-it-works"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            How It Works
+            {t('nav.campus_feed', 'Campus Feed')}
           </Link>
           <Link
             href="/#features"
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
-            Features
+            {t('nav.features', 'Features')}
           </Link>
           <Link
             href="/#about"
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
-            About
+            {t('nav.about', 'About')}
           </Link>
 
-          {/* Mobile Grouped Accessibility & Read Text Controls (Related Bordered Look) */}
+          {/* Mobile Grouped Accessibility & Read Text Controls */}
           <div className="my-2 p-1 border border-slate-300/80 rounded-xl bg-slate-50 flex items-center justify-around shadow-2xs">
             <button
               type="button"
@@ -355,7 +350,7 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
               className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold text-slate-700 hover:text-[#0D9488] hover:bg-white transition-colors cursor-pointer"
             >
               <Eye className="w-4 h-4 text-[#0D9488]" />
-              <span>Accessibility</span>
+              <span>{t('common.accessibility', 'Accessibility')}</span>
             </button>
             <div className="w-px h-5 bg-slate-300" />
             <button
@@ -369,7 +364,7 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
               className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold text-slate-700 hover:text-indigo-600 hover:bg-white transition-colors cursor-pointer"
             >
               <Volume2 className="w-4 h-4 text-indigo-600" />
-              <span>Read Text</span>
+              <span>{t('common.read_aloud', 'Read Text')}</span>
             </button>
           </div>
 
@@ -380,14 +375,14 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
-                Dashboard
+                {t('nav.dashboard', 'Dashboard')}
               </Link>
               <Link
                 href="/my-issues"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
-                My Reported Issues
+                {t('nav.my_complaints', 'My Reported Issues')}
               </Link>
               {isAdminOrStaff && (
                 <Link
@@ -395,7 +390,7 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
                   onClick={() => setMobileMenuOpen(false)}
                   className="block px-3 py-2 rounded-lg text-sm font-bold text-amber-600 bg-amber-50"
                 >
-                  Admin Facilities Center
+                  {t('nav.admin_portal', 'Admin Center')}
                 </Link>
               )}
               <Link
@@ -403,16 +398,16 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
                 onClick={() => setMobileMenuOpen(false)}
                 className="block text-center mt-3 bg-[#0D9488] text-white py-2.5 rounded-xl font-bold text-sm"
               >
-                Report an Issue
+                {t('nav.report_issue', 'Report Issue')}
               </Link>
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   handleSignOut();
                 }}
-                className="w-full text-left px-3 py-2 text-sm text-rose-600 font-semibold"
+                className="w-full text-left rtl:text-right px-3 py-2 text-sm text-rose-600 font-semibold"
               >
-                Sign Out
+                {t('nav.sign_out', 'Sign Out')}
               </button>
             </div>
           ) : (
@@ -422,14 +417,14 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
                 onClick={() => setMobileMenuOpen(false)}
                 className="block text-center py-2 text-sm font-semibold text-[#102A43] border border-slate-200 rounded-xl"
               >
-                Sign In
+                {t('nav.sign_in', 'Sign In')}
               </Link>
               <Link
                 href="/issues/new"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block text-center bg-[#0D9488] text-white py-2.5 rounded-xl font-bold text-sm"
               >
-                Get Started
+                {t('nav.sign_up', 'Get Started')}
               </Link>
             </div>
           )}

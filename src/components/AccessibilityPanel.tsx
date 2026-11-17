@@ -13,6 +13,7 @@ import {
   Sparkles,
   Check,
 } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n/LanguageContext';
 
 export interface AccessibilitySettings {
   fontSize: 'normal' | 'large' | 'xlarge';
@@ -31,6 +32,7 @@ const DEFAULT_SETTINGS: AccessibilitySettings = {
 };
 
 export function AccessibilityPanel() {
+  const { t, language } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [settings, setSettings] = useState<AccessibilitySettings>(DEFAULT_SETTINGS);
   const [isReadingSelection, setIsReadingSelection] = useState(false);
@@ -140,10 +142,12 @@ export function AccessibilityPanel() {
     const selectedText = window.getSelection()?.toString().trim();
     const textToRead =
       selectedText ||
-      'No text currently highlighted. Please highlight any paragraph or issue description on screen, then click Read Aloud to listen.';
+      (language === 'ur'
+        ? 'کوئی تحریر منتخب نہیں کی گئی۔ اسکرین پر کسی بھی پیراگراف کو منتخب کریں اور سننے کے لیے آواز سے پڑھیں پر کلک کریں۔'
+        : 'No text currently highlighted. Please highlight any paragraph or issue description on screen, then click Read Aloud to listen.');
 
     const utterance = new SpeechSynthesisUtterance(textToRead);
-    utterance.lang = 'en-US';
+    utterance.lang = language === 'ur' ? 'ur-PK' : 'en-US';
     utterance.onend = () => setIsReadingSelection(false);
     utterance.onerror = () => setIsReadingSelection(false);
 
@@ -170,17 +174,17 @@ export function AccessibilityPanel() {
                 </div>
                 <div>
                   <h2 id="a11y-title" className="font-bold text-base leading-tight">
-                    Accessibility & Display
+                    {t('a11y.title', 'Accessibility & Display')}
                   </h2>
                   <p className="text-[11px] text-teal-200">
-                    Customize your visual and reading preferences
+                    {t('a11y.subtitle', 'Customize your visual and reading preferences')}
                   </p>
                 </div>
               </div>
 
               <button
                 onClick={() => setIsOpen(false)}
-                aria-label="Close accessibility settings"
+                aria-label={t('common.close', 'Close')}
                 className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
@@ -193,13 +197,13 @@ export function AccessibilityPanel() {
               <div className="space-y-1.5">
                 <label className="font-bold text-slate-900 flex items-center gap-1.5">
                   <Type className="w-4 h-4 text-teal-600" />
-                  Text Size
+                  {t('a11y.font_size_label', 'Text Size')}
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { id: 'normal', label: 'Default (100%)' },
-                    { id: 'large', label: 'Large (115%)' },
-                    { id: 'xlarge', label: 'Extra (130%)' },
+                    { id: 'normal', label: t('a11y.size_normal', 'Default (100%)') },
+                    { id: 'large', label: t('a11y.size_large', 'Large (115%)') },
+                    { id: 'xlarge', label: t('a11y.size_xlarge', 'Extra (130%)') },
                   ].map((item) => (
                     <button
                       key={item.id}
@@ -220,7 +224,7 @@ export function AccessibilityPanel() {
               <div className="space-y-1.5">
                 <label className="font-bold text-slate-900 flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-amber-500" />
-                  Color Contrast
+                  {t('a11y.contrast_label', 'Color Contrast')}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
@@ -231,7 +235,7 @@ export function AccessibilityPanel() {
                         : 'border-slate-200 hover:bg-slate-50 text-slate-700'
                     }`}
                   >
-                    Normal Contrast
+                    {t('a11y.contrast_normal', 'Normal Contrast')}
                   </button>
                   <button
                     onClick={() => updateSetting('contrast', 'high')}
@@ -241,7 +245,7 @@ export function AccessibilityPanel() {
                         : 'border-slate-300 hover:bg-slate-100 text-slate-800'
                     }`}
                   >
-                    High Contrast
+                    {t('a11y.contrast_high', 'High Contrast')}
                   </button>
                 </div>
               </div>
@@ -281,7 +285,7 @@ export function AccessibilityPanel() {
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-slate-900 flex items-center gap-1.5">
                     <Volume2 className="w-4 h-4 text-indigo-600" />
-                    Read Page Content Aloud
+                    {t('a11y.read_aloud_title', 'Read Page Content Aloud')}
                   </span>
                   {isReadingSelection && (
                     <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full animate-pulse">
@@ -290,7 +294,7 @@ export function AccessibilityPanel() {
                   )}
                 </div>
                 <p className="text-[11px] text-slate-500 leading-relaxed">
-                  Highlight any text or issue description on screen, then click below to listen with natural speech.
+                  {t('a11y.read_aloud_desc', 'Highlight any text or issue description on screen, then click below to listen with natural speech.')}
                 </p>
                 <button
                   type="button"
@@ -307,7 +311,7 @@ export function AccessibilityPanel() {
                     </>
                   ) : (
                     <>
-                      <Volume2 className="w-4 h-4" /> Read Highlighted Text
+                      <Volume2 className="w-4 h-4" /> {t('common.read_aloud', 'Read Highlighted Text')}
                     </>
                   )}
                 </button>
@@ -319,14 +323,14 @@ export function AccessibilityPanel() {
                   onClick={resetSettings}
                   className="text-slate-500 hover:text-slate-800 text-xs font-semibold flex items-center gap-1 transition cursor-pointer"
                 >
-                  <RotateCcw className="w-3.5 h-3.5" /> Reset Defaults
+                  <RotateCcw className="w-3.5 h-3.5" /> {t('a11y.reset_defaults', 'Reset Defaults')}
                 </button>
 
                 <button
                   onClick={() => setIsOpen(false)}
                   className="bg-[#102A43] hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-xl transition cursor-pointer"
                 >
-                  Save & Apply
+                  {t('common.save', 'Save & Apply')}
                 </button>
               </div>
             </div>

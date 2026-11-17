@@ -142,8 +142,18 @@ export async function POST(req: NextRequest) {
 
     // Build language-aware system prompt
     let sysPrompt = SYSTEM_PROMPT;
-    if (language === 'ur') sysPrompt += '\n\nRespond in Urdu script.';
-    else if (language === 'roman_ur') sysPrompt += '\n\nRespond in Roman Urdu.';
+    if (language === 'ur') {
+      sysPrompt += `\n\nLANGUAGE INSTRUCTION (MANDATORY):
+- The user's active interface language is Urdu.
+- You MUST answer in proper, natural, grammatically correct Urdu script (اردو رسم الخط).
+- Even if the user asks in English or Roman Urdu, understand their question and compose your response in proper Urdu.
+- Explain technical concepts in clear, accessible Urdu, preserving well-known English technical terms (e.g. Wi-Fi, HVAC, Dashboard, Portal) where appropriate for clarity.
+- Do NOT use Roman Urdu in your response. Output genuine Urdu characters.`;
+    } else if (language === 'roman_ur') {
+      sysPrompt += '\n\nRespond in Roman Urdu.';
+    } else {
+      sysPrompt += '\n\nRespond in clear, professional English.';
+    }
 
     // =======================================================================
     // PROVIDER 1: GROQ (openai/gpt-oss-120b) — unchanged model, optimized

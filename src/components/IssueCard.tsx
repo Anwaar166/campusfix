@@ -1,5 +1,8 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from '@/lib/i18n/LanguageContext';
 import { IssueWithCounts } from '@/types/database';
 import { StatusBadge } from './StatusBadge';
 import { UrgencyBadge } from './UrgencyBadge';
@@ -14,11 +17,15 @@ interface Props {
 }
 
 export function IssueCard({ issue, currentUserId, hasUpvoted = false }: Props) {
-  const formattedDate = new Date(issue.created_at).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
+  const { t, language } = useTranslation();
+  const formattedDate = new Date(issue.created_at).toLocaleDateString(
+    language === 'ur' ? 'ur-PK' : 'en-US',
+    {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }
+  );
 
   return (
     <div className="group bg-white rounded-2xl border border-slate-200/90 hover:border-teal-400/80 shadow-xs hover:shadow-lg hover:shadow-teal-500/5 transition-all duration-300 p-5 flex flex-col md:flex-row gap-4 items-start relative hover:-translate-y-0.5">
@@ -44,12 +51,12 @@ export function IssueCard({ issue, currentUserId, hasUpvoted = false }: Props) {
           {issue.duplicate_of && (
             <span className="inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
               <CopyCheck className="w-3 h-3 mr-1 text-slate-500" />
-              Duplicate Link
+              {language === 'ur' ? 'ڈپلیکیٹ رپورٹ' : 'Duplicate Link'}
             </span>
           )}
 
           <span className="text-xs text-slate-500 ml-auto hidden sm:inline">
-            Reported {formattedDate}
+            {language === 'ur' ? `رپورٹ شدہ: ${formattedDate}` : `Reported ${formattedDate}`}
           </span>
         </div>
 
@@ -80,7 +87,7 @@ export function IssueCard({ issue, currentUserId, hasUpvoted = false }: Props) {
             {/* Reporter */}
             <div className="flex items-center gap-1">
               <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-              <span>{issue.reporter_name || 'Anonymous Campus Member'}</span>
+              <span>{issue.reporter_name || (language === 'ur' ? 'کیمپس رکن' : 'Anonymous Campus Member')}</span>
             </div>
 
             {/* Assigned info */}
@@ -97,7 +104,7 @@ export function IssueCard({ issue, currentUserId, hasUpvoted = false }: Props) {
             href={`/issues/${issue.id}`}
             className="inline-flex items-center gap-1 font-semibold text-[#0D9488] hover:text-teal-700 ml-auto"
           >
-            <span>View details</span>
+            <span>{t('common.details', 'View details')}</span>
             <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>

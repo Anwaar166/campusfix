@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { getCurrentUser, getUnreadNotificationCount } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
+import { getServerTranslation } from '@/lib/i18n/server';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { IssueCard } from '@/components/IssueCard';
@@ -33,6 +34,7 @@ import {
 export const revalidate = 0; // dynamic data
 
 export default async function HomePage() {
+  const { t, lang } = await getServerTranslation();
   const { user, profile } = await getCurrentUser();
   const unreadCount = user ? await getUnreadNotificationCount(user.id) : 0;
   const supabase = await createClient();
@@ -93,20 +95,20 @@ export default async function HomePage() {
               {/* Pill badge */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-50 border border-teal-200/90 text-[#0D9488] text-xs font-extrabold tracking-wide shadow-2xs">
                 <Sparkles className="w-3.5 h-3.5 text-[#0D9488]" />
-                <span className="uppercase tracking-wider">SMART CAMPUS MAINTENANCE PLATFORM</span>
+                <span className="uppercase tracking-wider">{t('home.hero_badge', 'SMART CAMPUS MAINTENANCE PLATFORM')}</span>
               </div>
 
               {/* Main Heading */}
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#102A43] tracking-tight leading-[1.1]">
-                A Smarter Campus Starts With{' '}
+                {t('home.hero_title_1', 'A Smarter Campus Starts With')}{' '}
                 <span className="text-transparent bg-clip-text bg-linear-to-r from-[#0D9488] to-teal-500">
-                  Better Solutions.
+                  {t('home.hero_title_2', 'Better Solutions.')}
                 </span>
               </h1>
 
               {/* Subheading */}
               <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                Centralized campus issue reporting, community upvoting, and maintenance workflow platform. Replace slow paper forms and lost emails with transparent, tracked repairs across every lecture hall, lab, and residence.
+                {t('home.hero_desc', 'Centralized campus issue reporting, community upvoting, and maintenance workflow platform. Replace slow paper forms and lost emails with transparent, tracked repairs across every lecture hall, lab, and residence.')}
               </p>
 
               {/* Primary & Secondary Action CTAs */}
@@ -116,14 +118,14 @@ export default async function HomePage() {
                   className="inline-flex items-center gap-2 bg-[#0D9488] hover:bg-[#0f766e] text-white font-bold text-sm sm:text-base px-6 py-3.5 rounded-xl shadow-md shadow-teal-600/20 hover:shadow-lg hover:shadow-teal-600/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
                 >
                   <PlusCircle className="w-5 h-5" />
-                  Report an Issue
+                  {t('home.hero_report_btn', 'Report an Issue')}
                 </Link>
                 <Link
                   href="/issues"
                   className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-[#102A43] font-bold text-sm sm:text-base px-6 py-3.5 rounded-xl border border-slate-300 shadow-2xs hover:border-slate-400 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
                 >
                   <Compass className="w-5 h-5 text-[#0D9488]" />
-                  Explore Campus Feed
+                  {t('home.hero_feed_btn', 'Explore Campus Feed')}
                 </Link>
               </div>
 
@@ -131,15 +133,15 @@ export default async function HomePage() {
               <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs text-slate-500 font-medium">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[#0D9488]" />
-                  <span>Real-time Supabase Database</span>
+                  <span>{lang === 'ur' ? 'ریئل ٹائم سپابیس ڈیٹا بیس' : 'Real-time Supabase Database'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[#0D9488]" />
-                  <span>Campus-wide Upvoting</span>
+                  <span>{lang === 'ur' ? 'کیمپس اپ ووٹنگ سسٹم' : 'Campus-wide Upvoting'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[#0D9488]" />
-                  <span>Row-Level Security Verification</span>
+                  <span>{lang === 'ur' ? 'رو لیول سیکیورٹی تصدیق' : 'Row-Level Security Verification'}</span>
                 </div>
               </div>
             </div>
@@ -236,13 +238,15 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
             <h2 className="text-xs font-extrabold uppercase tracking-widest text-[#0D9488]">
-              REAL-TIME DATABASE METRICS
+              {lang === 'ur' ? 'ریئل ٹائم ڈیٹا بیس میٹرکس' : 'REAL-TIME DATABASE METRICS'}
             </h2>
             <p className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Campus Facilities Impact
+              {lang === 'ur' ? 'کیمپس فسیلیٹیز پر اثرات' : 'Campus Facilities Impact'}
             </p>
             <p className="text-xs sm:text-sm text-slate-400">
-              Aggregated directly from our live Supabase PostgreSQL work order database.
+              {lang === 'ur'
+                ? 'سپابیس پوسٹگریس لائیو ڈیٹا بیس سے براہ راست حاصل کردہ اعداد و شمار۔'
+                : 'Aggregated directly from our live Supabase PostgreSQL work order database.'}
             </p>
           </div>
 
@@ -255,8 +259,8 @@ export default async function HomePage() {
               <div className="text-3xl sm:text-4xl font-black text-white">
                 {totalCount ?? 9}
               </div>
-              <div className="text-xs font-bold text-slate-300">Total Campus Reports</div>
-              <div className="text-[11px] text-slate-500">Documented & triaged</div>
+              <div className="text-xs font-bold text-slate-300">{lang === 'ur' ? 'کل کیمپس رپورٹس' : 'Total Campus Reports'}</div>
+              <div className="text-[11px] text-slate-500">{lang === 'ur' ? 'درج اور زیرِ جائزہ' : 'Documented & triaged'}</div>
             </div>
 
             {/* Card 2: Open Issues */}
@@ -267,8 +271,8 @@ export default async function HomePage() {
               <div className="text-3xl sm:text-4xl font-black text-amber-400">
                 {openCount ?? 2}
               </div>
-              <div className="text-xs font-bold text-slate-300">Open Tickets</div>
-              <div className="text-[11px] text-slate-500">Awaiting assignment</div>
+              <div className="text-xs font-bold text-slate-300">{lang === 'ur' ? 'کھلی شکایات' : 'Open Tickets'}</div>
+              <div className="text-[11px] text-slate-500">{lang === 'ur' ? 'تفویض کی منتظر' : 'Awaiting assignment'}</div>
             </div>
 
             {/* Card 3: Resolved Issues */}
@@ -279,8 +283,8 @@ export default async function HomePage() {
               <div className="text-3xl sm:text-4xl font-black text-emerald-400">
                 {resolvedCount ?? 3}
               </div>
-              <div className="text-xs font-bold text-slate-300">Verified Fixes</div>
-              <div className="text-[11px] text-slate-500">Resolved & feedback-rated</div>
+              <div className="text-xs font-bold text-slate-300">{t('home.stat_resolved', 'Verified Fixes')}</div>
+              <div className="text-[11px] text-slate-500">{lang === 'ur' ? 'مکمل اور تصدیق شدہ' : 'Resolved & feedback-rated'}</div>
             </div>
 
             {/* Card 4: Avg Resolution Velocity */}
@@ -291,8 +295,8 @@ export default async function HomePage() {
               <div className="text-3xl sm:text-4xl font-black text-teal-300">
                 &lt; 48 hrs
               </div>
-              <div className="text-xs font-bold text-slate-300">Average Turnaround</div>
-              <div className="text-[11px] text-slate-500">Meeting campus SLA standards</div>
+              <div className="text-xs font-bold text-slate-300">{t('home.stat_avg_time', 'Average Turnaround')}</div>
+              <div className="text-[11px] text-slate-500">{lang === 'ur' ? 'کیمپس ایس ایل اے معیار' : 'Meeting campus SLA standards'}</div>
             </div>
           </div>
         </div>
@@ -303,13 +307,13 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <span className="text-xs font-extrabold uppercase tracking-widest text-[#0D9488]">
-              PLATFORM CAPABILITIES
+              {lang === 'ur' ? 'پلیٹ فارم کی صلاحیتیں' : 'PLATFORM CAPABILITIES'}
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-[#102A43] tracking-tight">
-              Engineered for Modern Campus Facilities
+              {t('home.features_title', 'Engineered for Modern Campus Facilities')}
             </h2>
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-              Every tool students, faculty, maintenance engineers, and university administrators need to maintain world-class campus infrastructure.
+              {t('home.features_subtitle', 'Every tool students, faculty, maintenance engineers, and university administrators need to maintain world-class campus infrastructure.')}
             </p>
           </div>
 
@@ -320,10 +324,10 @@ export default async function HomePage() {
                 <PlusCircle className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-bold text-[#102A43] group-hover:text-[#0D9488] transition-colors">
-                1. Smart Issue Reporting
+                1. {t('home.feat_1_title', 'Smart Issue Reporting')}
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Report facility bugs in 30 seconds with building pickers, urgency flags, and photo uploads. Built-in real-time duplicate detection prevents spamming duplicate maintenance tickets.
+                {t('home.feat_1_desc', 'Report facility bugs in 30 seconds with building pickers, urgency flags, and photo uploads. Built-in real-time duplicate detection prevents spamming duplicate maintenance tickets.')}
               </p>
             </div>
 
@@ -333,10 +337,10 @@ export default async function HomePage() {
                 <Activity className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-bold text-[#102A43] group-hover:text-[#0D9488] transition-colors">
-                2. Real-Time Issue Tracking
+                2. {t('home.feat_3_title', 'Real-Time Issue Tracking')}
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Watch work orders progress live from Open to In Progress, Resolved, or Closed. Complete audit trail logs with staff notes and timestamps ensure complete operational transparency.
+                {t('home.feat_3_desc', 'Watch work orders progress live from Open to In Progress, Resolved, or Closed. Complete audit trail logs with staff notes and timestamps ensure complete operational transparency.')}
               </p>
             </div>
 
@@ -346,10 +350,10 @@ export default async function HomePage() {
                 <ThumbsUp className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-bold text-[#102A43] group-hover:text-[#0D9488] transition-colors">
-                3. Community Upvoting
+                3. {t('home.feat_2_title', 'Community Upvoting')}
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Crowdsource campus repair priorities. Students and faculty vote on broken projectors, freezing study rooms, or elevators so maintenance crews address the highest-impact issues first.
+                {t('home.feat_2_desc', 'Crowdsource campus repair priorities. Students and faculty vote on broken projectors, freezing study rooms, or elevators so maintenance crews address the highest-impact issues first.')}
               </p>
             </div>
 
@@ -359,10 +363,12 @@ export default async function HomePage() {
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-bold text-[#102A43] group-hover:text-[#0D9488] transition-colors">
-                4. Admin Management Center
+                4. {lang === 'ur' ? 'ایڈمن کنٹرول سینٹر' : 'Admin Management Center'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Facilities coordinators assign tickets to designated teams (HVAC, Electrical, Plumbing, IT), update statuses, trigger automated notifications, and manage campus buildings and categories.
+                {lang === 'ur'
+                  ? 'فسیلیٹیز کوآرڈینیٹرز متعلقہ ٹیموں (ایچ وی اے سی، الیکٹریکل، پلمبنگ، آئی ٹی) کو ٹکٹس تفویض کرتے ہیں اور اسٹیٹس اپ ڈیٹ کرتے ہیں۔'
+                  : 'Facilities coordinators assign tickets to designated teams (HVAC, Electrical, Plumbing, IT), update statuses, trigger automated notifications, and manage campus buildings and categories.'}
               </p>
             </div>
 
@@ -372,10 +378,10 @@ export default async function HomePage() {
                 <Bot className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-bold text-[#102A43] group-hover:text-[#0D9488] transition-colors">
-                5. AI-Powered Assistance
+                5. {t('home.feat_4_title', 'AI-Powered Assistance')}
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Smart assistance guides users to write precise problem descriptions, recommends appropriate categories and urgency, and flags duplicate work orders before submission.
+                {t('home.feat_4_desc', 'Smart assistance guides users to write precise problem descriptions, recommends appropriate categories and urgency, and flags duplicate work orders before submission.')}
               </p>
             </div>
 
@@ -385,10 +391,12 @@ export default async function HomePage() {
                 <BarChart3 className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-bold text-[#102A43] group-hover:text-[#0D9488] transition-colors">
-                6. Campus Analytics & Reports
+                6. {lang === 'ur' ? 'کیمپس تجزیات اور رپورٹس' : 'Campus Analytics & Reports'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Measure repair velocity, track recurring breakdowns by building, analyze team resolution rates, and export clean CSV reports for quarterly campus infrastructure audits.
+                {lang === 'ur'
+                  ? 'مرمت کی رفتار، عمارات کے لحاظ سے بار بار خرابیاں، اور فسیلیٹیز آڈٹ کے لیے مکمل سی ایس وی رپورٹس برآمد کریں۔'
+                  : 'Measure repair velocity, track recurring breakdowns by building, analyze team resolution rates, and export clean CSV reports for quarterly campus infrastructure audits.'}
               </p>
             </div>
           </div>
@@ -400,13 +408,15 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-14">
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <span className="text-xs font-extrabold uppercase tracking-widest text-[#0D9488]">
-              SIMPLE 4-STEP WORKFLOW
+              {lang === 'ur' ? 'آسان 4 مرحلہ وار طریقہ کار' : 'SIMPLE 4-STEP WORKFLOW'}
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-[#102A43] tracking-tight">
-              How CampusFix Resolves Issues
+              {lang === 'ur' ? 'کیمپس فکس کیسے کام کرتا ہے' : 'How CampusFix Resolves Issues'}
             </h2>
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-              From the moment a problem is spotted to verified resolution, our automated pipeline keeps every stakeholder informed.
+              {lang === 'ur'
+                ? 'مسئلے کی رپورٹنگ سے لے کر حتمی تصدیق تک، ہمارا خودکار نظام تمام طلبہ و فیکلٹی کو باخبر رکھتا ہے۔'
+                : 'From the moment a problem is spotted to verified resolution, our automated pipeline keeps every stakeholder informed.'}
             </p>
           </div>
 
@@ -420,10 +430,12 @@ export default async function HomePage() {
                 </div>
               </div>
               <h3 className="text-base font-bold text-[#102A43]">
-                1. Report Campus Issue
+                1. {lang === 'ur' ? 'کیمپس مسئلہ رپورٹ کریں' : 'Report Campus Issue'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Student or faculty member submits an issue with room number, category, urgency, and optional photo attachment in under a minute.
+                {lang === 'ur'
+                  ? 'طالب علم یا فیکلٹی رکن کمرہ نمبر، کیٹیگری، ترجیح اور آواز کے ذریعے ایک منٹ میں شکایت درج کر سکتے ہیں۔'
+                  : 'Student or faculty member submits an issue with room number, category, urgency, and optional voice notes in under a minute.'}
               </p>
             </div>
 
@@ -436,10 +448,12 @@ export default async function HomePage() {
                 </div>
               </div>
               <h3 className="text-base font-bold text-[#102A43]">
-                2. Admin Triage & Assign
+                2. {lang === 'ur' ? 'جائزہ اور ٹیم تفویض' : 'Admin Triage & Assign'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Facilities coordinators review incoming reports, verify urgency, and instantly assign tickets to the specialized maintenance team.
+                {lang === 'ur'
+                  ? 'انتظامیہ شکایات کا جائزہ لے کر ترجیح کی تصدیق کرتی ہے اور متعلقہ ٹیکنیکل ٹیم کو فوری روانہ کرتی ہے۔'
+                  : 'Facilities coordinators review incoming reports, verify urgency, and instantly assign tickets to the specialized maintenance team.'}
               </p>
             </div>
 
@@ -452,10 +466,12 @@ export default async function HomePage() {
                 </div>
               </div>
               <h3 className="text-base font-bold text-[#102A43]">
-                3. Maintenance Fix & Audit
+                3. {lang === 'ur' ? 'مرمت اور لائیو ٹائم لائن' : 'Maintenance Fix & Audit'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Field technicians dispatch to the location, resolve the malfunction, and post timestamped progress notes to the public timeline.
+                {lang === 'ur'
+                  ? 'فیلڈ ٹیکنیشنز جائے وقوعہ پر پہنچ کر مسئلہ حل کرتے ہیں اور عوامی ٹائم لائن پر ٹائم اسٹیمپڈ نوٹس شائع کرتے ہیں۔'
+                  : 'Field technicians dispatch to the location, resolve the malfunction, and post timestamped progress notes to the public timeline.'}
               </p>
             </div>
 
@@ -468,10 +484,12 @@ export default async function HomePage() {
                 </div>
               </div>
               <h3 className="text-base font-bold text-[#102A43]">
-                4. Verified Resolution & Rating
+                4. {lang === 'ur' ? 'تصدیق اور ریٹنگ' : 'Verified Resolution & Rating'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                The original reporter and community upvoters are notified immediately, with 5-star satisfaction rating cards to verify fix quality.
+                {lang === 'ur'
+                  ? 'رپورٹ کرنے والے صارف کو فوری اطلاع ملتی ہے اور وہ کام کے معیار پر 5 اسٹار ریٹنگ فراہم کر سکتا ہے۔'
+                  : 'The original reporter and community upvoters are notified immediately, with satisfaction rating cards to verify fix quality.'}
               </p>
             </div>
           </div>
@@ -586,20 +604,22 @@ export default async function HomePage() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="space-y-2">
               <span className="text-xs font-extrabold uppercase tracking-widest text-[#0D9488]">
-                LIVE CAMPUS ACTIVITY
+                {lang === 'ur' ? 'لائیو کیمپس سرگرمیاں' : 'LIVE CAMPUS ACTIVITY'}
               </span>
               <h2 className="text-3xl font-black text-[#102A43] tracking-tight">
-                Recent Campus Maintenance Reports
+                {t('dashboard.recent_activity', 'Recent Campus Maintenance Reports')}
               </h2>
               <p className="text-xs sm:text-sm text-slate-600">
-                Explore real active and resolved work orders submitted by the campus community.
+                {lang === 'ur'
+                  ? 'کیمپس کمیونٹی کی جانب سے جمع کروائی گئی فعال اور مکمل شدہ شکایات ملاحظہ کریں۔'
+                  : 'Explore real active and resolved work orders submitted by the campus community.'}
               </p>
             </div>
             <Link
               href="/issues"
               className="inline-flex items-center gap-1 text-sm font-bold text-[#0D9488] hover:text-[#0f766e] transition-colors"
             >
-              <span>View Full Campus Feed</span>
+              <span>{t('dashboard.browse_all_issues', 'View Full Campus Feed')}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -618,16 +638,16 @@ export default async function HomePage() {
           ) : (
             <div className="bg-white rounded-2xl p-12 text-center border border-slate-200">
               <Compass className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-              <h3 className="text-base font-bold text-slate-900">No issues reported yet</h3>
+              <h3 className="text-base font-bold text-slate-900">{t('dashboard.no_issues_found', 'No issues reported yet')}</h3>
               <p className="text-xs text-slate-500 mt-1 mb-4">
-                Be the first to submit a maintenance request on campus!
+                {t('dashboard.no_issues_desc', 'Be the first to submit a maintenance request on campus!')}
               </p>
               <Link
                 href="/issues/new"
                 className="inline-flex items-center gap-2 bg-[#0D9488] text-white text-xs font-bold px-4 py-2 rounded-xl"
               >
                 <PlusCircle className="w-4 h-4" />
-                Report First Issue
+                {t('home.hero_report_btn', 'Report First Issue')}
               </Link>
             </div>
           )}
@@ -638,20 +658,20 @@ export default async function HomePage() {
       <section id="about" className="py-16 sm:py-20 bg-white border-t border-slate-200/80">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-5">
           <span className="text-xs font-extrabold uppercase tracking-widest text-[#0D9488]">
-            ABOUT CAMPUSFIX
+            {t('home.about_title', 'ABOUT CAMPUSFIX')}
           </span>
           <h2 className="text-3xl font-black text-[#102A43] tracking-tight">
-            Built for Transparency. Dedicated to Campus Excellence.
+            {t('home.about_subtitle', 'Built for Transparency. Dedicated to Campus Excellence.')}
           </h2>
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-            CampusFix bridges the communication gap between university members who discover facility problems and the dedicated maintenance teams who fix them. By providing community upvoting, real-time audit timelines, and data-driven facilities triage, we empower our university community to keep educational spaces safe, comfortable, and productive.
+            {t('home.about_p1', 'Universities are vibrant cities within cities.')} {t('home.about_p2', 'CampusFix replaces outdated paper logs and unread emails with a transparent, student-centric platform where repairs are documented, tracked, and promptly resolved.')}
           </p>
           <div className="pt-2">
             <Link
               href="/issues/new"
               className="inline-flex items-center gap-2 bg-[#102A43] hover:bg-slate-800 text-white font-bold text-sm px-6 py-3 rounded-xl shadow-xs transition-colors"
             >
-              Get Started with CampusFix
+              {lang === 'ur' ? 'کیمپس فکس کا استعمال شروع کریں' : 'Get Started with CampusFix'}
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getCurrentUser, getUnreadNotificationCount } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
+import { getServerTranslation } from '@/lib/i18n/server';
 import { DashboardSidebar } from '@/components/DashboardSidebar';
 import { Footer } from '@/components/Footer';
 import { IssueCard } from '@/components/IssueCard';
@@ -29,6 +30,7 @@ import {
 export const revalidate = 0; // dynamic
 
 export default async function DashboardPage() {
+  const { t, lang } = await getServerTranslation();
   const { user, profile } = await getCurrentUser();
   if (!user) {
     redirect('/login?redirectTo=/dashboard');
@@ -79,7 +81,9 @@ export default async function DashboardPage() {
     .order('upvotes_count', { ascending: false })
     .limit(3);
 
-  const roleDisplay = profile?.role === 'faculty' ? 'Faculty Member' : 'Student';
+  const roleDisplay = profile?.role === 'faculty'
+    ? (lang === 'ur' ? 'فیکلٹی ممبر' : 'Faculty Member')
+    : (lang === 'ur' ? 'طالب علم' : 'Student');
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
@@ -97,22 +101,22 @@ export default async function DashboardPage() {
             <div className="space-y-2 relative z-10">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-xs font-semibold backdrop-blur-xs">
                 <Sparkles className="w-3.5 h-3.5 text-teal-400" />
-                <span>{roleDisplay} Control Center</span>
+                <span>{roleDisplay} {lang === 'ur' ? 'کنٹرول سینٹر' : 'Control Center'}</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                Welcome back, {profile?.full_name?.split(' ')[0] || 'Campus Member'}!
+                {t('dashboard.welcome_back', 'Welcome back,')} {profile?.full_name?.split(' ')[0] || (lang === 'ur' ? 'کیمپس رکن' : 'Campus Member')}!
               </h1>
               <p className="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
-                Track the real-time resolution status of your maintenance requests, review timeline updates, and help prioritize campus repairs.
+                {t('dashboard.subtitle', 'Track the real-time resolution status of your maintenance requests, review timeline updates, and help prioritize campus repairs.')}
               </p>
             </div>
 
             <Link
               href="/issues/new"
-              className="inline-flex items-center justify-center gap-2 bg-[#0D9488] hover:bg-teal-500 text-white font-bold text-xs sm:text-sm px-5 py-3 rounded-xl shadow-md transition-all shrink-0 self-start sm:self-auto"
+              className="inline-flex items-center justify-center gap-2 bg-[#0D9488] hover:bg-teal-500 text-white font-bold text-xs sm:text-sm px-5 py-3 rounded-xl shadow-md transition-all shrink-0 self-start sm:self-auto cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
-              <span>Report New Issue</span>
+              <span>{t('dashboard.report_new_issue', 'Report New Issue')}</span>
             </Link>
           </div>
 
@@ -121,41 +125,41 @@ export default async function DashboardPage() {
               {/* Card 1: Total */}
               <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
                 <div className="text-slate-500 text-xs font-bold flex items-center justify-between">
-                  <span>My Reports</span>
+                  <span>{t('dashboard.reported_by_you', 'My Reports')}</span>
                   <User className="w-4 h-4 text-indigo-500" />
                 </div>
                 <div className="text-3xl font-black text-[#102A43]">{totalMyReports}</div>
-                <div className="text-[11px] text-slate-400">Total submitted</div>
+                <div className="text-[11px] text-slate-400">{lang === 'ur' ? 'کل شکایات' : 'Total submitted'}</div>
               </div>
 
               {/* Card 2: Open */}
               <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
                 <div className="text-slate-500 text-xs font-bold flex items-center justify-between">
-                  <span>Open Tickets</span>
+                  <span>{t('dashboard.pending_review', 'Open Tickets')}</span>
                   <Clock className="w-4 h-4 text-sky-500" />
                 </div>
                 <div className="text-3xl font-black text-sky-600">{myOpenReports}</div>
-                <div className="text-[11px] text-slate-400">Under review</div>
+                <div className="text-[11px] text-slate-400">{lang === 'ur' ? 'زیرِ جائزہ' : 'Under review'}</div>
               </div>
 
               {/* Card 3: In Progress */}
               <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
                 <div className="text-slate-500 text-xs font-bold flex items-center justify-between">
-                  <span>In Progress</span>
+                  <span>{t('dashboard.in_progress', 'In Progress')}</span>
                   <Wrench className="w-4 h-4 text-amber-500" />
                 </div>
                 <div className="text-3xl font-black text-amber-600">{myInProgress}</div>
-                <div className="text-[11px] text-slate-400">Technician active</div>
+                <div className="text-[11px] text-slate-400">{lang === 'ur' ? 'ٹیکنیشن فعال' : 'Technician active'}</div>
               </div>
 
               {/* Card 4: Resolved */}
               <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
                 <div className="text-slate-500 text-xs font-bold flex items-center justify-between">
-                  <span>Resolved</span>
+                  <span>{t('dashboard.resolved', 'Resolved')}</span>
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                 </div>
                 <div className="text-3xl font-black text-emerald-600">{myResolved}</div>
-                <div className="text-[11px] text-slate-400">Verified & closed</div>
+                <div className="text-[11px] text-slate-400">{lang === 'ur' ? 'مکمل و تصدیق شدہ' : 'Verified & closed'}</div>
               </div>
             </div>
 
@@ -164,10 +168,12 @@ export default async function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-black text-[#102A43]">
-                    My Reported Issues
+                    {t('issues.my_complaints_title', 'My Reported Issues')}
                   </h2>
                   <p className="text-xs text-slate-500">
-                    Live status and updates for your submitted campus tickets.
+                    {lang === 'ur'
+                      ? 'آپ کی جمع کروائی گئی شکایات کی موجودہ صورتحال اور پیش رفت۔'
+                      : 'Live status and updates for your submitted campus tickets.'}
                   </p>
                 </div>
                 {totalMyReports > 0 && (
@@ -175,7 +181,7 @@ export default async function DashboardPage() {
                     href="/my-issues"
                     className="text-xs font-bold text-[#0D9488] hover:underline flex items-center gap-1"
                   >
-                    <span>View all ({totalMyReports})</span>
+                    <span>{lang === 'ur' ? `تمام دیکھیں (${totalMyReports})` : `View all (${totalMyReports})`}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 )}
@@ -185,9 +191,9 @@ export default async function DashboardPage() {
                 <div className="bg-white rounded-3xl p-8 sm:p-10 text-center border border-slate-200/90 space-y-3">
                   <Inbox className="w-10 h-10 text-slate-400 mx-auto" />
                   <div className="space-y-1">
-                    <h3 className="font-bold text-sm text-[#102A43]">You haven't reported any issues yet</h3>
+                    <h3 className="font-bold text-sm text-[#102A43]">{t('dashboard.no_issues_found', "You haven't reported any issues yet")}</h3>
                     <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                      Notice a broken desk, flickering light, or HVAC issue on campus? Submit a quick report to dispatch facilities crews.
+                      {t('dashboard.no_issues_desc', 'Notice a broken desk, flickering light, or HVAC issue on campus? Submit a quick report to dispatch facilities crews.')}
                     </p>
                   </div>
                   <Link
@@ -195,7 +201,7 @@ export default async function DashboardPage() {
                     className="inline-flex items-center gap-2 bg-[#0D9488] hover:bg-[#0f766e] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all"
                   >
                     <PlusCircle className="w-4 h-4" />
-                    <span>Report Your First Issue</span>
+                    <span>{t('dashboard.report_new_issue', 'Report Your First Issue')}</span>
                   </Link>
                 </div>
               ) : (

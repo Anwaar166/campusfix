@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n/LanguageContext';
 import { createClient } from '@/lib/supabase/client';
 import { UserRole } from '@/types/database';
 import { QuickDemoLogin } from './QuickDemoLogin';
@@ -30,6 +31,7 @@ interface Props {
 }
 
 export function AuthForm({ mode }: Props) {
+  const { t, language } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirectTo') || '';
@@ -273,7 +275,7 @@ export function AuthForm({ mode }: Props) {
         {mode === 'login' && (
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
-              Select Portal Destination
+              {t('auth.portal_label', 'Select Portal Destination')}
             </label>
             <div className="grid grid-cols-3 gap-2">
               <button
@@ -286,7 +288,7 @@ export function AuthForm({ mode }: Props) {
                 }`}
               >
                 <GraduationCap className="w-3.5 h-3.5" />
-                <span>Student</span>
+                <span>{t('roles.student', 'Student')}</span>
               </button>
 
               <button
@@ -299,7 +301,7 @@ export function AuthForm({ mode }: Props) {
                 }`}
               >
                 <School className="w-3.5 h-3.5" />
-                <span>Faculty</span>
+                <span>{t('roles.faculty', 'Faculty')}</span>
               </button>
 
               <button
@@ -312,7 +314,7 @@ export function AuthForm({ mode }: Props) {
                 }`}
               >
                 <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
-                <span>Admin</span>
+                <span>{t('roles.admin', 'Admin')}</span>
               </button>
             </div>
           </div>
@@ -322,7 +324,7 @@ export function AuthForm({ mode }: Props) {
         {mode === 'signup' && (
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
-              Full Name
+              {t('auth.full_name_label', 'Full Name')}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -333,7 +335,7 @@ export function AuthForm({ mode }: Props) {
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="e.g. Alex Rivera"
+                placeholder={t('auth.full_name_placeholder', 'e.g. Alex Rivera')}
                 className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#0D9488] focus:border-transparent transition-all"
               />
             </div>
@@ -343,7 +345,7 @@ export function AuthForm({ mode }: Props) {
         {/* EMAIL (ALL MODES) */}
         <div>
           <label className="block text-xs font-bold text-slate-700 mb-1">
-            University Email Address
+            {t('auth.email_label', 'University Email Address')}
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -354,7 +356,7 @@ export function AuthForm({ mode }: Props) {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="user@campusfix.edu"
+              placeholder={t('auth.email_placeholder', 'user@campusfix.edu')}
               className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#0D9488] focus:border-transparent transition-all"
             />
           </div>
@@ -365,21 +367,21 @@ export function AuthForm({ mode }: Props) {
           <div className="grid grid-cols-2 gap-2.5">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Account Role
+                {t('auth.role_label', 'Account Role')}
               </label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value as 'student' | 'faculty')}
                 className="w-full py-2 px-3 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#0D9488] transition-all cursor-pointer"
               >
-                <option value="student">Student Account</option>
-                <option value="faculty">Faculty Member</option>
+                <option value="student">{t('roles.student', 'Student Account')}</option>
+                <option value="faculty">{t('roles.faculty', 'Faculty Member')}</option>
               </select>
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Department
+                {t('auth.department_label', 'Department')}
               </label>
               <input
                 type="text"
@@ -397,14 +399,14 @@ export function AuthForm({ mode }: Props) {
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="text-xs font-bold text-slate-700">
-                Password
+                {t('auth.password_label', 'Password')}
               </label>
               {mode === 'login' && (
                 <Link
                   href="/forgot-password"
                   className="text-[11px] font-semibold text-[#0D9488] hover:underline"
                 >
-                  Forgot password?
+                  {t('auth.forgot_password', 'Forgot password?')}
                 </Link>
               )}
             </div>
@@ -436,7 +438,7 @@ export function AuthForm({ mode }: Props) {
         {mode === 'signup' && (
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
-              Confirm Password
+              {t('auth.confirm_password', 'Confirm Password')}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -484,10 +486,10 @@ export function AuthForm({ mode }: Props) {
             <>
               <span>
                 {mode === 'login'
-                  ? 'Sign In to CampusFix'
+                  ? t('auth.submit_sign_in', 'Sign In to CampusFix')
                   : mode === 'signup'
-                  ? 'Create Campus Account'
-                  : 'Send Reset Link'}
+                  ? t('auth.submit_sign_up', 'Create Campus Account')
+                  : t('auth.send_reset_link', 'Send Reset Link')}
               </span>
               <ArrowRight className="w-4 h-4" />
             </>
@@ -499,36 +501,36 @@ export function AuthForm({ mode }: Props) {
       <div className="mt-4 pt-4 border-t border-slate-100 text-center">
         {mode === 'login' && (
           <p className="text-xs text-slate-600">
-            Don&apos;t have a university account?{' '}
+            {t('auth.dont_have_account', "Don't have a university account?")}{' '}
             <Link
               href="/signup"
               className="font-bold text-[#0D9488] hover:text-[#0f766e] transition-colors"
             >
-              Register here
+              {t('auth.register_here', 'Register here')}
             </Link>
           </p>
         )}
 
         {mode === 'signup' && (
           <p className="text-xs text-slate-600">
-            Already have an active account?{' '}
+            {t('auth.already_have_account', 'Already have an active account?')}{' '}
             <Link
               href="/login"
               className="font-bold text-[#0D9488] hover:text-[#0f766e] transition-colors"
             >
-              Sign in
+              {t('auth.sign_in', 'Sign in')}
             </Link>
           </p>
         )}
 
         {mode === 'forgot-password' && (
           <p className="text-xs text-slate-600">
-            Remembered your credentials?{' '}
+            {t('auth.remembered_creds', 'Remembered your credentials?')}{' '}
             <Link
               href="/login"
               className="font-bold text-[#0D9488] hover:text-[#0f766e] transition-colors"
             >
-              Back to Sign In
+              {t('auth.back_to_login', 'Back to Sign In')}
             </Link>
           </p>
         )}

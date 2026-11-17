@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n/LanguageContext';
 import { ShieldAlert, GraduationCap, School, Wrench, Sparkles, Loader2, ArrowRight } from 'lucide-react';
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function QuickDemoLogin({ redirectTo, onSelectRole }: Props) {
+  const { t, language } = useTranslation();
   const [loading, setLoading] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
@@ -54,16 +56,18 @@ export function QuickDemoLogin({ redirectTo, onSelectRole }: Props) {
             <Sparkles className="w-3.5 h-3.5" />
           </div>
           <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800">
-            One-Click Instant Demo Login
+            {t('auth.quick_demo_login', 'One-Click Instant Demo Login')}
           </h4>
         </div>
         <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-100/80 text-indigo-700">
-          No typing required
+          {language === 'ur' ? 'ٹائپنگ کی ضرورت نہیں' : 'No typing required'}
         </span>
       </div>
 
       <p className="text-xs text-slate-600 leading-relaxed">
-        Select a demo persona to test role-based access, triage workflows, and campus community feeds:
+        {language === 'ur'
+          ? 'رول کے مطابق رسائی اور فیچرز آزمانے کے لیے ڈیمو کردار منتخب کریں:'
+          : 'Select a demo persona to test role-based access, triage workflows, and campus community feeds:'}
       </p>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">

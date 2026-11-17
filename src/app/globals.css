@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap");
 
 @theme {
   --color-navy: #102a43;
@@ -15,12 +16,36 @@
 :root {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-urdu: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', 'Urdu Typesetting', Tahoma, system-ui, sans-serif;
 }
 
 body {
   font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background-color: #f8fafc;
   color: #0f172a;
+}
+
+/* RTL & Urdu Typography Rules */
+[dir="rtl"],
+html[lang="ur"] {
+  font-family: var(--font-urdu);
+  text-align: right;
+  direction: rtl;
+}
+
+[dir="rtl"] body {
+  font-family: var(--font-urdu);
+}
+
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right;
+}
+
+[dir="rtl"] .ltr-only {
+  direction: ltr !important;
+  text-align: left !important;
 }
 
 /* Custom smooth scrollbars */

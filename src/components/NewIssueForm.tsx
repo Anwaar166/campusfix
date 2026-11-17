@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n/LanguageContext';
 import { createClient } from '@/lib/supabase/client';
 import { Building, Category, IssueUrgency } from '@/types/database';
 import { DuplicateDetector } from './DuplicateDetector';
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
+  const { t, language } = useTranslation();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState(categories[0]?.name || 'IT & Wi-Fi');
@@ -65,6 +67,7 @@ export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
         try {
           const formData = new FormData();
           formData.append('file', audioBlob, 'description.webm');
+          formData.append('language', language === 'ur' ? 'ur' : 'en');
 
           const res = await fetch('/api/ai/transcribe', {
             method: 'POST',
@@ -209,7 +212,7 @@ export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
         <div className="space-y-1.5">
           <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
             <Building2 className="w-4 h-4 text-indigo-600" />
-            Campus Building <span className="text-rose-500">*</span>
+            {t('issues.building_label', 'Campus Building')} <span className="text-rose-500">*</span>
           </label>
           <select
             value={building}
@@ -229,7 +232,7 @@ export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
         <div className="space-y-1.5">
           <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
             <Tag className="w-4 h-4 text-indigo-600" />
-            Issue Category <span className="text-rose-500">*</span>
+            {t('issues.category_label', 'Issue Category')} <span className="text-rose-500">*</span>
           </label>
           <select
             value={category}
@@ -250,13 +253,13 @@ export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
       <div className="space-y-1.5">
         <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
           <MapPin className="w-4 h-4 text-indigo-600" />
-          Room Number or Precise Location <span className="text-rose-500">*</span>
+          {t('issues.location_label', 'Room Number or Precise Location')} <span className="text-rose-500">*</span>
         </label>
         <input
           type="text"
           value={roomLocation}
           onChange={(e) => setRoomLocation(e.target.value)}
-          placeholder="e.g. 2nd Floor Quiet Zone Desk 14, or Biochem Lab 204 near sink"
+          placeholder={t('issues.location_placeholder', 'e.g. 2nd Floor Quiet Zone Desk 14, or Biochem Lab 204 near sink')}
           className="w-full text-xs sm:text-sm rounded-xl border border-slate-300 p-3 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500"
           required
         />
@@ -266,19 +269,19 @@ export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
       <div className="space-y-1.5">
         <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
           <FileText className="w-4 h-4 text-indigo-600" />
-          Issue Title / Summary <span className="text-rose-500">*</span>
+          {t('issues.title_label', 'Issue Title / Summary')} <span className="text-rose-500">*</span>
         </label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="e.g. Overhead projector displays intermittent purple discoloration"
+          placeholder={t('issues.title_placeholder', 'e.g. Overhead projector displays intermittent purple discoloration')}
           className="w-full text-xs sm:text-sm rounded-xl border border-slate-300 p-3 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500"
           maxLength={150}
           required
         />
         <div className="text-[11px] text-slate-500 flex justify-between">
-          <span>Brief summary of the issue</span>
+          <span>{language === 'ur' ? 'مسئلے کا مختصر خلاصہ' : 'Brief summary of the issue'}</span>
           <span>{title.length}/150</span>
         </div>
       </div>
@@ -290,25 +293,42 @@ export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
       <div className="space-y-2">
         <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
           <Flame className="w-4 h-4 text-indigo-600" />
-          Urgency Level <span className="text-rose-500">*</span>
+          {t('issues.urgency_label', 'Urgency Level')} <span className="text-rose-500">*</span>
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           {[
-            { level: 'Low', desc: 'Cosmetic or minor inconvenience' },
-            { level: 'Medium', desc: 'Normal classroom or office fault' },
-            { level: 'High', desc: 'Disrupts instruction or heavy traffic' },
-            { level: 'Critical', desc: 'Safety hazard or immediate risk' },
+            {
+              level: 'Low',
+              label: t('urgency.low', 'Low'),
+              desc: language === 'ur' ? 'معمولی یا ظاہری نوعیت کا مسئلہ' : 'Cosmetic or minor inconvenience',
+            },
+            {
+              level: 'Medium',
+              label: t('urgency.medium', 'Medium'),
+              desc: language === 'ur' ? 'کلاس روم یا دفتر کی معمول کی خرابی' : 'Normal classroom or office fault',
+            },
+            {
+              level: 'High',
+              label: t('urgency.high', 'High'),
+              desc: language === 'ur' ? 'تعلیمی سرگرمیوں یا آمدورفت میں رکاوٹ' : 'Disrupts instruction or heavy traffic',
+            },
+            {
+              level: 'Critical',
+              label: t('urgency.critical', 'Critical'),
+              desc: language === 'ur' ? 'سنگین خطرہ یا فوری حفاظتی مسئلہ' : 'Safety hazard or immediate risk',
+            },
           ].map((item) => (
             <button
               type="button"
               key={item.level}
               onClick={() => setUrgency(item.level as IssueUrgency)}
-              className={`p-3 rounded-xl border text-left transition-all ${urgency === item.level
-                ? 'border-indigo-600 bg-indigo-50/70 ring-2 ring-indigo-500/20'
-                : 'border-slate-200 bg-white hover:bg-slate-50'
-                }`}
+              className={`p-3 rounded-xl border text-left transition-all ${
+                urgency === item.level
+                  ? 'border-indigo-600 bg-indigo-50/70 ring-2 ring-indigo-500/20'
+                  : 'border-slate-200 bg-white hover:bg-slate-50'
+              }`}
             >
-              <div className="text-xs font-bold text-slate-900">{item.level}</div>
+              <div className="text-xs font-bold text-slate-900">{item.label}</div>
               <div className="text-[10px] text-slate-500 leading-tight mt-0.5">{item.desc}</div>
             </button>
           ))}
@@ -320,29 +340,30 @@ export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
         <div className="flex items-center justify-between">
           <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
             <FileText className="w-4 h-4 text-[#0D9488]" />
-            Detailed Description <span className="text-rose-500">*</span>
+            {t('issues.desc_label', 'Detailed Description')} <span className="text-rose-500">*</span>
           </label>
 
           <button
             type="button"
             onClick={isRecording ? stopVoiceDictation : startVoiceDictation}
             disabled={isTranscribing}
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${isRecording
-              ? 'bg-rose-600 text-white animate-pulse shadow-xs'
-              : 'bg-teal-50 text-[#0D9488] border border-teal-200 hover:bg-teal-100'
-              }`}
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              isRecording
+                ? 'bg-rose-600 text-white animate-pulse shadow-xs'
+                : 'bg-teal-50 text-[#0D9488] border border-teal-200 hover:bg-teal-100'
+            }`}
           >
             {isRecording ? (
               <>
-                <MicOff className="w-3.5 h-3.5" /> Stop Dictation
+                <MicOff className="w-3.5 h-3.5" /> {language === 'ur' ? 'ڈکٹیشن روکیں' : 'Stop Dictation'}
               </>
             ) : isTranscribing ? (
               <>
-                <Mic className="w-3.5 h-3.5 animate-spin" /> Transcribing...
+                <Mic className="w-3.5 h-3.5 animate-spin" /> {language === 'ur' ? 'آواز تبدیل ہو رہی ہے...' : 'Transcribing...'}
               </>
             ) : (
               <>
-                <Mic className="w-3.5 h-3.5" /> Dictate with Voice (Whisper)
+                <Mic className="w-3.5 h-3.5" /> {t('issues.voice_dictate', 'Dictate with Voice (Whisper)')}
               </>
             )}
           </button>
@@ -351,7 +372,7 @@ export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
           rows={5}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Please describe symptoms, when you noticed it, any error messages, or safety implications..."
+          placeholder={t('issues.desc_placeholder', 'Please describe symptoms, when you noticed it, any error messages, or safety implications...')}
           className="w-full text-xs sm:text-sm rounded-xl border border-slate-300 p-3 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500"
           required
         />
@@ -364,16 +385,18 @@ export function NewIssueForm({ buildings, categories, currentUserId }: Props) {
           onClick={() => router.back()}
           className="px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors"
         >
-          Cancel
+          {t('common.cancel', 'Cancel')}
         </button>
 
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all"
+          className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer"
         >
           <Send className="w-4 h-4" />
-          {loading ? 'Submitting Request...' : 'Submit Maintenance Request'}
+          {loading
+            ? (language === 'ur' ? 'شکایت جمع ہو رہی ہے...' : 'Submitting Request...')
+            : t('issues.submit_report', 'Submit Maintenance Request')}
         </button>
       </div>
     </form>

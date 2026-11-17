@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from '@/lib/i18n/LanguageContext';
 import {
   Bot,
   X,
@@ -35,7 +36,7 @@ interface Message {
   audioUrl?: string;
 }
 
-const QUICK_PROMPTS = [
+const QUICK_PROMPTS_EN = [
   { label: '📋 How to report', query: 'How do I report a maintenance issue?' },
   { label: '🏷️ Suggest category', query: 'Suggest the right category for a broken air conditioner' },
   { label: '🔄 Status meanings', query: 'What does In Progress status mean?' },
@@ -43,7 +44,16 @@ const QUICK_PROMPTS = [
   { label: '🇵🇰 اردو میں مدد', query: 'کیمپس میں شکایت کیسے درج کریں؟' },
 ];
 
+const QUICK_PROMPTS_UR = [
+  { label: '📋 شکایت درج کریں', query: 'کیمپس میں شکایت کیسے درج کریں؟' },
+  { label: '🏷️ کیٹیگری تجویز', query: 'خراب ائیر کنڈیشنر کے لیے درست کیٹیگری تجویز کریں' },
+  { label: '🔄 اسٹیٹس کا مطلب', query: 'زیرِ کارروائی اسٹیٹس کا کیا مطلب ہے؟' },
+  { label: '✍️ شکایت کا مسودہ', query: 'پانی کے پائپ کے رساؤ کی شکایت لکھنے میں مدد کریں' },
+  { label: '🇬🇧 Help in English', query: 'How do I report a maintenance issue?' },
+];
+
 export function CampusFixAI() {
+  const { language: appLang, dir: appDir, t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [input, setInput] = useState('');
@@ -52,6 +62,15 @@ export function CampusFixAI() {
   // AI Provider & Language Settings
   const [provider, setProvider] = useState<'gemini' | 'groq'>('gemini');
   const [language, setLanguage] = useState<'en' | 'ur' | 'roman_ur'>('en');
+
+  // Sync AI language with app language
+  useEffect(() => {
+    if (appLang === 'ur') {
+      setLanguage('ur');
+    } else if (appLang === 'en') {
+      setLanguage('en');
+    }
+  }, [appLang]);
 
   // Voice Mode & Audio Playback
   const [isVoiceMode, setIsVoiceMode] = useState(false);
@@ -798,9 +817,9 @@ export function CampusFixAI() {
               {/* Quick Prompts Bar */}
               <div className="px-3 py-1.5 bg-white border-t border-slate-200 flex items-center gap-1.5 overflow-x-auto text-[11px] no-scrollbar shrink-0">
                 <span className="text-slate-400 font-semibold shrink-0 flex items-center gap-1 text-[10px]">
-                  <Lightbulb className="w-3 h-3 text-amber-500" /> Quick:
+                  <Lightbulb className="w-3 h-3 text-amber-500" /> {language === 'ur' ? 'فوری تجاویز:' : 'Quick:'}
                 </span>
-                {QUICK_PROMPTS.map((p, i) => (
+                {(language === 'ur' ? QUICK_PROMPTS_UR : QUICK_PROMPTS_EN).map((p, i) => (
                   <button
                     key={i}
                     onClick={() => handleSendMessage(p.query)}

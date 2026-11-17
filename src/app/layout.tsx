@@ -5,6 +5,8 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { CampusFixAI } from "@/components/CampusFixAI";
 import { AccessibilityPanel } from "@/components/AccessibilityPanel";
 import { ReadAloudButton } from "@/components/ReadAloudButton";
+import { LanguageProvider } from "@/lib/i18n/LanguageContext";
+import { LanguageSelectionModal } from "@/components/LanguageSelectionModal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,12 +30,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased scroll-smooth`}>
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 selection:bg-indigo-500 selection:text-white">
-        {children}
-        <CampusFixAI />
-        <AccessibilityPanel />
-        <ReadAloudButton />
-        <ScrollToTop />
+      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 selection:bg-indigo-500 selection:text-white transition-colors duration-200">
+        <LanguageProvider>
+          {children}
+          <LanguageSelectionModal />
+          <CampusFixAI />
+          <AccessibilityPanel />
+          <ReadAloudButton />
+          <ScrollToTop />
+        </LanguageProvider>
       </body>
     </html>
   );
