@@ -180,17 +180,26 @@ Keep responses helpful, concise, well-structured with markdown headings, bullets
     }
 
     // -------------------------------------------------------------
-    // PROVIDER 2: GOOGLE GEMINI API (models/gemini-4-hydrogen)
+    // PROVIDER 2: GOOGLE GEMINI API (gemini-4-hydrogen)
     // -------------------------------------------------------------
-    const geminiKey = process.env.GEMINI_API_KEY;
-    if (geminiKey) {
+    if (provider === 'gemini') {
+      const geminiKey = process.env.GEMINI_API_KEY;
+      if (!geminiKey) {
+        return NextResponse.json({
+          reply: `⚠️ **Gemini API Key Not Configured**\n\nPlease add \`GEMINI_API_KEY\` to your environment variables to use the **gemini-4-hydrogen** model.`,
+          provider: 'gemini',
+          model: 'gemini-4-hydrogen',
+          error: 'GEMINI_API_KEY is not set.',
+        });
+      }
+
       try {
         let GoogleGenAIClass: any = null;
         try {
           const genaiMod = await import('@google/genai');
           GoogleGenAIClass = genaiMod.GoogleGenAI;
-        } catch {
-          // Fall through to REST API
+        } catch (importErr: any) {
+          console.warn('Could not dynamically import @google/genai:', importErr);
         }
 
         const promptText = `${systemPrompt}\n\nUser Question:\n${latestMessage}`;
@@ -199,63 +208,87 @@ Keep responses helpful, concise, well-structured with markdown headings, bullets
           const ai = new GoogleGenAIClass({ apiKey: geminiKey });
 
           try {
-            // Reference implementation: ai.interactions.create with exact requested model
+            const generationConfig = {
+              max_output_tokens: 65536,
+              thinking_level: 'high',
+            };
+
+            // Use ai.interactions.create with exact requested model & generation config
             const interaction = await ai.interactions.create({
-              model: 'models/gemini-4-hydrogen',
+              model: 'gemini-4-hydrogen',
               input: promptText,
-              tools: [{ type: 'google_search' }],
-              generation_config: {
-                max_output_tokens: 65536,
-                thinkingLevel: 'high',
-              },
+              generation_config: generationConfig,
             });
 
-            const lastStep = interaction.steps?.at(-1);
-            const geminiReply =
-              lastStep?.text ||
-              lastStep?.output ||
-              interaction.output_text ||
-              (typeof interaction === 'string' ? interaction : '');
+            let geminiReply = interaction.output_text;
+            if (!geminiReply && interaction.steps) {
+              for (const step of interaction.steps) {
+                if (step.type === 'model_output' && Array.isArray(step.content)) {
+                  for (const part of step.content) {
+                    if (part.text) {
+                      geminiReply = (geminiReply ? geminiReply + '\n' : '') + part.text;
+                    }
+                  }
+                }
+              }
+            }
 
-            if (geminiReply) {
+            if (geminiReply && geminiReply.trim().length > 0) {
               return NextResponse.json({
-                reply: geminiReply,
+                reply: geminiReply.trim(),
                 provider: 'gemini',
-                model: 'models/gemini-4-hydrogen',
+                model: 'gemini-4-hydrogen',
               });
             }
-          } catch (modelErr: any) {
-            console.warn(
-              'models/gemini-4-hydrogen interaction error, testing models.generateContent fallback:',
-              modelErr?.message
-            );
 
-            // Report exact error if model is unavailable
             return NextResponse.json({
-              reply: `⚠️ **Gemini Model Notice**\n\nThe requested model \`models/gemini-4-hydrogen\` returned: \`${modelErr?.message || 'Model or Interactions API not available'}\`.\n\nPlease verify this preview model identifier on your Google Cloud / AI Studio project.`,
+              reply: 'No text response received from Gemini Interactions API.',
               provider: 'gemini',
-              model: 'models/gemini-4-hydrogen',
-              error: modelErr?.message,
+              model: 'gemini-4-hydrogen',
+            });
+          } catch (modelErr: any) {
+            console.error('Gemini Interactions API error with gemini-4-hydrogen:', modelErr);
+            const rawMsg = modelErr?.message || modelErr?.toString() || 'Model error';
+            let friendlyMessage = `⚠️ **Gemini API Error**: \`${rawMsg}\`\n\nModel: \`gemini-4-hydrogen\``;
+
+            if (rawMsg.includes('429') || rawMsg.includes('quota') || rawMsg.includes('RESOURCE_EXHAUSTED')) {
+              friendlyMessage = `⚠️ **Gemini Rate Limit / Quota Exceeded (429)**\n\nYou have temporarily reached the rate limit or quota for \`gemini-4-hydrogen\`.\n\n*Error details:* \`${rawMsg}\`\n\n*Tip: Please wait 30–60 seconds before sending another message, or switch to Groq (120B) in the model dropdown.*`;
+            } else if (rawMsg.includes('404') || rawMsg.includes('NOT_FOUND')) {
+              friendlyMessage = `⚠️ **Gemini Model Not Found (404)**\n\nThe requested model \`gemini-4-hydrogen\` was not found or is not enabled for your Google Cloud / AI Studio project.\n\n*Error details:* \`${rawMsg}\``;
+            } else if (rawMsg.includes('403') || rawMsg.includes('PERMISSION_DENIED') || rawMsg.includes('API_KEY_INVALID')) {
+              friendlyMessage = `⚠️ **Gemini Authentication / Permission Error (403)**\n\nPlease check that your \`GEMINI_API_KEY\` is active and authorized for the Gemini Interactions API.\n\n*Error details:* \`${rawMsg}\``;
+            }
+
+            // Do not silently switch to another model - report exact error
+            return NextResponse.json({
+              reply: friendlyMessage,
+              provider: 'gemini',
+              model: 'gemini-4-hydrogen',
+              error: rawMsg,
             });
           }
         } else {
-          // Direct REST API to test models/gemini-4-hydrogen
+          // Direct REST API fallback
           const restUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-4-hydrogen:generateContent?key=${geminiKey}`;
           const res = await fetch(restUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               contents: [{ role: 'user', parts: [{ text: promptText }] }],
+              generationConfig: {
+                maxOutputTokens: 65536,
+              },
             }),
           });
 
           const data = await res.json();
           if (!res.ok) {
+            const restError = data?.error?.message || 'Error communicating with Gemini REST API';
             return NextResponse.json({
-              reply: `⚠️ **Gemini API (${res.status})**: \`${data?.error?.message || 'Model gemini-4-hydrogen returned an error'}\`.\n\nPlease check if your Gemini API key has access to \`models/gemini-4-hydrogen\`.`,
+              reply: `⚠️ **Gemini API Error (${res.status})**: \`${restError}\`\n\nModel: \`gemini-4-hydrogen\``,
               provider: 'gemini',
-              model: 'models/gemini-4-hydrogen',
-              error: data?.error?.message,
+              model: 'gemini-4-hydrogen',
+              error: restError,
             });
           }
 
@@ -263,15 +296,15 @@ Keep responses helpful, concise, well-structured with markdown headings, bullets
           return NextResponse.json({
             reply: generatedText || 'No response generated.',
             provider: 'gemini',
-            model: 'models/gemini-4-hydrogen',
+            model: 'gemini-4-hydrogen',
           });
         }
       } catch (geminiCatchErr: any) {
-        console.error('Gemini API Error:', geminiCatchErr);
+        console.error('Gemini Execution Error:', geminiCatchErr);
         return NextResponse.json({
-          reply: `❌ **Gemini Error**: \`${geminiCatchErr?.message || 'Failed connecting to Gemini'}\` with model \`models/gemini-4-hydrogen\`.`,
+          reply: `❌ **Gemini Error**: \`${geminiCatchErr?.message || 'Failed connecting to Gemini'}\` with model \`gemini-4-hydrogen\`.`,
           provider: 'gemini',
-          model: 'models/gemini-4-hydrogen',
+          model: 'gemini-4-hydrogen',
           error: geminiCatchErr?.message,
         });
       }
