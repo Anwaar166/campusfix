@@ -118,6 +118,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         }
       }).catch(() => {});
     } catch {}
+
+    // Automatically reload the page so all server and client components fully change text
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
   }, []);
 
   // Translation lookup supporting dot notation: t('nav.home')

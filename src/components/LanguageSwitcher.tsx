@@ -24,7 +24,11 @@ export function LanguageSwitcher({ className = '', variant = 'pill' }: LanguageS
       <div className="flex items-center gap-0.5 text-xs font-semibold">
         <button
           type="button"
-          onClick={() => setLanguage('en')}
+          onClick={() => {
+            if (language !== 'en') {
+              setLanguage('en');
+            }
+          }}
           aria-label="Switch to English"
           className={`px-2 py-1 rounded-lg transition-all duration-200 cursor-pointer ${
             language === 'en'
@@ -39,7 +43,11 @@ export function LanguageSwitcher({ className = '', variant = 'pill' }: LanguageS
 
         <button
           type="button"
-          onClick={() => setLanguage('ur')}
+          onClick={() => {
+            if (language !== 'ur') {
+              setLanguage('ur');
+            }
+          }}
           aria-label="اردو میں تبدیل کریں"
           className={`px-2 py-1 rounded-lg transition-all duration-200 font-serif cursor-pointer ${
             language === 'ur'

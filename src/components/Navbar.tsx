@@ -71,21 +71,19 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
           <nav className="hidden md:flex items-center gap-1 text-sm font-medium text-slate-600">
             <Link
               href="/"
-              className={`px-3 py-2 rounded-lg transition-colors ${
-                pathname === '/'
+              className={`px-3 py-2 rounded-lg transition-colors ${pathname === '/'
                   ? 'text-[#102A43] font-bold bg-slate-100'
                   : 'hover:text-[#102A43] hover:bg-slate-50'
-              }`}
+                }`}
             >
               {t('nav.home', 'Home')}
             </Link>
             <Link
               href="/issues"
-              className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5 ${
-                pathname.startsWith('/issues') && pathname !== '/issues/new'
+              className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5 ${pathname.startsWith('/issues') && pathname !== '/issues/new'
                   ? 'text-[#0D9488] font-bold bg-teal-50'
                   : 'hover:text-[#102A43] hover:bg-slate-50'
-              }`}
+                }`}
             >
               <Compass className="w-4 h-4 text-slate-400" />
               {t('nav.campus_feed', 'Campus Feed')}
@@ -139,11 +137,10 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
             {initialProfile && (
               <Link
                 href="/dashboard"
-                className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5 ${
-                  pathname === '/dashboard'
+                className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5 ${pathname === '/dashboard'
                     ? 'text-[#102A43] font-bold bg-slate-100'
                     : 'hover:text-[#102A43] hover:bg-slate-50'
-                }`}
+                  }`}
               >
                 <LayoutDashboard className="w-4 h-4 text-slate-400" />
                 {t('nav.dashboard', 'Dashboard')}
@@ -153,11 +150,10 @@ export function Navbar({ initialProfile, unreadCount = 0 }: Props) {
             {isAdminOrStaff && (
               <Link
                 href="/admin"
-                className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5 ${
-                  pathname.startsWith('/admin')
+                className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5 ${pathname.startsWith('/admin')
                     ? 'bg-[#102A43] text-white font-bold'
                     : 'text-[#102A43] hover:bg-slate-100 font-semibold'
-                }`}
+                  }`}
               >
                 <ShieldAlert className="w-4 h-4 text-amber-500" />
                 {t('nav.admin_portal', 'Admin Center')}

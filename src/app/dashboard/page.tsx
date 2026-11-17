@@ -218,77 +218,48 @@ export default async function DashboardPage() {
               )}
             </div>
 
-            {/* Recent Timeline Updates on User's Issues */}
-            {recentUpdates.length > 0 && (
-              <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs space-y-4">
+          {/* Trending Campus Issues */}
+          {trendingIssues && trendingIssues.length > 0 && (
+            <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs space-y-4">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-[#0D9488]" />
+                  <ThumbsUp className="w-4 h-4 text-amber-500" />
                   <h3 className="font-bold text-sm text-[#102A43]">
-                    Recent Activity on Your Reports
+                    Trending Campus Issues (Community Priority)
                   </h3>
                 </div>
-                <div className="divide-y divide-slate-100 text-xs">
-                  {recentUpdates.map((update) => (
-                    <div key={update.id} className="py-2.5 first:pt-0 last:pb-0 flex items-start justify-between gap-4">
-                      <div>
-                        <span className="font-semibold text-slate-800">
-                          {update.issues?.title || 'Report Update'}
-                        </span>
-                        <p className="text-slate-500 text-[11px] mt-0.5">
-                          {update.comment || `Status updated to ${update.status}`}
-                        </p>
-                      </div>
-                      <span className="text-[10px] text-slate-400 shrink-0 font-medium">
-                        {new Date(update.created_at).toLocaleDateString()}
+                <Link href="/issues?sort=upvotes" className="text-xs font-bold text-[#0D9488] hover:underline">
+                  View Trending Feed →
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {trendingIssues.map((issue) => (
+                  <Link
+                    key={issue.id}
+                    href={`/issues/${issue.id}`}
+                    className="p-3.5 rounded-2xl bg-slate-50 hover:bg-teal-50/50 border border-slate-200 hover:border-teal-300 transition-all flex flex-col justify-between space-y-2 group"
+                  >
+                    <div className="space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-[#0D9488]">
+                        {issue.building}
                       </span>
+                      <h4 className="font-bold text-xs text-slate-900 group-hover:text-[#0D9488] transition-colors line-clamp-2">
+                        {issue.title}
+                      </h4>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Trending Campus Issues */}
-            {trendingIssues && trendingIssues.length > 0 && (
-              <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <ThumbsUp className="w-4 h-4 text-amber-500" />
-                    <h3 className="font-bold text-sm text-[#102A43]">
-                      Trending Campus Issues (Community Priority)
-                    </h3>
-                  </div>
-                  <Link href="/issues?sort=upvotes" className="text-xs font-bold text-[#0D9488] hover:underline">
-                    View Trending Feed →
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-200/60">
+                      <span className="inline-flex items-center gap-1 font-bold text-amber-600">
+                        <ThumbsUp className="w-3 h-3" /> {issue.upvotes_count || 0}
+                      </span>
+                      <span className="font-medium text-slate-600">{issue.status}</span>
+                    </div>
                   </Link>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {trendingIssues.map((issue) => (
-                    <Link
-                      key={issue.id}
-                      href={`/issues/${issue.id}`}
-                      className="p-3.5 rounded-2xl bg-slate-50 hover:bg-teal-50/50 border border-slate-200 hover:border-teal-300 transition-all flex flex-col justify-between space-y-2 group"
-                    >
-                      <div className="space-y-1">
-                        <span className="text-[10px] uppercase font-bold text-[#0D9488]">
-                          {issue.building}
-                        </span>
-                        <h4 className="font-bold text-xs text-slate-900 group-hover:text-[#0D9488] transition-colors line-clamp-2">
-                          {issue.title}
-                        </h4>
-                      </div>
-                      <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-200/60">
-                        <span className="inline-flex items-center gap-1 font-bold text-amber-600">
-                          <ThumbsUp className="w-3 h-3" /> {issue.upvotes_count || 0}
-                        </span>
-                        <span className="font-medium text-slate-600">{issue.status}</span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+                ))}
               </div>
-            )}
-          </main>
+            </div>
+          )}
+        </main>
 
         <Footer />
       </div>

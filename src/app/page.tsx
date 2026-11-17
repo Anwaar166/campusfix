@@ -164,7 +164,7 @@ export default async function HomePage() {
                     </div>
                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                      Live Feed
+                      {lang === 'ur' ? 'لائیو فیڈ' : 'Live Feed'}
                     </span>
                   </div>
 
@@ -173,18 +173,18 @@ export default async function HomePage() {
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="font-semibold text-teal-400 flex items-center gap-1">
                         <Building2 className="w-3 h-3" />
-                        Science Complex • Lab 304
+                        {lang === 'ur' ? 'سائنس کمپلیکس • لیب 304' : 'Science Complex • Lab 304'}
                       </span>
                       <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-[10px]">
-                        Resolved (Verified)
+                        {lang === 'ur' ? 'حل شدہ (تصدیق شدہ)' : 'Resolved (Verified)'}
                       </span>
                     </div>
                     <p className="text-xs font-bold text-slate-100">
-                      Emergency Eyewash Station Pressure Valve Restored
+                      {lang === 'ur' ? 'ایمرجنسی آئی واش اسٹیشن کا والو ٹھیک کر دیا گیا' : 'Emergency Eyewash Station Pressure Valve Restored'}
                     </p>
                     <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-800/80">
-                      <span>Assigned to: Plumbing & Fire Crew</span>
-                      <span className="text-emerald-400 font-bold">Fixed in 42m</span>
+                      <span>{lang === 'ur' ? 'متعلقہ ٹیم: پلمبنگ عملہ' : 'Assigned to: Plumbing & Fire Crew'}</span>
+                      <span className="text-emerald-400 font-bold">{lang === 'ur' ? '42 منٹ میں حل' : 'Fixed in 42m'}</span>
                     </div>
                   </div>
 
@@ -193,20 +193,20 @@ export default async function HomePage() {
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="font-semibold text-amber-400 flex items-center gap-1">
                         <Building2 className="w-3 h-3" />
-                        Main Library • 2nd Floor
+                        {lang === 'ur' ? 'مرکزی لائبریری • دوسری منزل' : 'Main Library • 2nd Floor'}
                       </span>
                       <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold text-[10px]">
-                        In Progress
+                        {lang === 'ur' ? 'زیرِ کارروائی' : 'In Progress'}
                       </span>
                     </div>
                     <p className="text-xs font-bold text-slate-100">
-                      HVAC Chiller Unit Airflow Balancing in Study Pods
+                      {lang === 'ur' ? 'اسٹڈی پوڈز میں ایئر کنڈیشننگ ہوا کا توازن بحال' : 'HVAC Chiller Unit Airflow Balancing in Study Pods'}
                     </p>
                     <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-800/80">
                       <span className="inline-flex items-center gap-1 text-teal-400 font-bold">
-                        <ThumbsUp className="w-3 h-3" /> 28 Student Upvotes
+                        <ThumbsUp className="w-3 h-3" /> {lang === 'ur' ? '28 طلبہ کے ووٹ' : '28 Student Upvotes'}
                       </span>
-                      <span className="text-slate-400">Technician On-Site</span>
+                      <span className="text-slate-400">{lang === 'ur' ? 'ٹیکنیشن جائے وقوعہ پر موجود' : 'Technician On-Site'}</span>
                     </div>
                   </div>
 
@@ -214,11 +214,11 @@ export default async function HomePage() {
                   <div className="grid grid-cols-2 gap-2.5 pt-1">
                     <div className="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60 text-center">
                       <div className="text-lg font-black text-teal-400">98.4%</div>
-                      <div className="text-[10px] text-slate-400 font-medium">SLA Compliance Rate</div>
+                      <div className="text-[10px] text-slate-400 font-medium">{lang === 'ur' ? 'ایس ایل اے عملدرآمد' : 'SLA Compliance Rate'}</div>
                     </div>
                     <div className="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60 text-center">
-                      <div className="text-lg font-black text-amber-400">&lt; 48 Hrs</div>
-                      <div className="text-[10px] text-slate-400 font-medium">Avg Resolution Velocity</div>
+                      <div className="text-lg font-black text-amber-400">&lt; 48 {lang === 'ur' ? 'گھنٹے' : 'Hrs'}</div>
+                      <div className="text-[10px] text-slate-400 font-medium">{lang === 'ur' ? 'اوسط حل کی رفتار' : 'Avg Resolution Velocity'}</div>
                     </div>
                   </div>
                 </div>
@@ -509,47 +509,49 @@ export default async function HomePage() {
               <div className="lg:col-span-7 space-y-6">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 border border-teal-400/30 text-teal-300 text-xs font-bold">
                   <Bot className="w-4 h-4 text-teal-400" />
-                  <span>CAMPUSFIX AI COPILOT</span>
+                  <span>{lang === 'ur' ? 'کیمپس فکس اے آئی معاون' : 'CAMPUSFIX AI COPILOT'}</span>
                 </div>
 
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
-                  Intelligent Guidance for Every Campus Request.
+                  {lang === 'ur' ? 'ہر کیمپس مسئلے کے لیے ذہین رہنمائی۔' : 'Intelligent Guidance for Every Campus Request.'}
                 </h2>
 
                 <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-                  CampusFix AI powers our facilities portal with continuous intelligence. It assists students during reporting and gives maintenance leadership predictive insights:
+                  {lang === 'ur'
+                    ? 'کیمپس فکس اے آئی ہمارے فسیلیٹیز پورٹل کو خودکار ذہانت فراہم کرتا ہے۔ طلبہ کو شکایت درج کرنے میں مدد اور انتظامیہ کو پیشگی تجزیاتی معلومات دیتا ہے:'
+                    : 'CampusFix AI powers our facilities portal with continuous intelligence. It assists students during reporting and gives maintenance leadership predictive insights:'}
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                   <div className="flex items-start gap-3 bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
                     <Lightbulb className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
                     <div className="text-xs">
-                      <strong className="block text-white font-bold mb-0.5">Description Enhancer</strong>
-                      <span className="text-slate-400">Prompts users for crucial details like exact room side or unit model numbers.</span>
+                      <strong className="block text-white font-bold mb-0.5">{lang === 'ur' ? 'تفصیلات میں خودکار بہتری' : 'Description Enhancer'}</strong>
+                      <span className="text-slate-400">{lang === 'ur' ? 'صارف کو درست کمرہ، یونٹ یا مقام کی تفصیلات شامل کرنے میں مدد دیتا ہے۔' : 'Prompts users for crucial details like exact room side or unit model numbers.'}</span>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3 bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
                     <Layers className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" />
                     <div className="text-xs">
-                      <strong className="block text-white font-bold mb-0.5">Category Auto-Suggest</strong>
-                      <span className="text-slate-400">Classifies issues into HVAC, Electrical, Plumbing, or Safety automatically.</span>
+                      <strong className="block text-white font-bold mb-0.5">{lang === 'ur' ? 'کیٹیگری کی خودکار تجویز' : 'Category Auto-Suggest'}</strong>
+                      <span className="text-slate-400">{lang === 'ur' ? 'مسائل کو ایچ وی اے سی، الیکٹریکل، پلمبنگ یا حفاظت میں خود درجہ بندی کرتا ہے۔' : 'Classifies issues into HVAC, Electrical, Plumbing, or Safety automatically.'}</span>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3 bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
                     <Search className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
                     <div className="text-xs">
-                      <strong className="block text-white font-bold mb-0.5">Duplicate Warning</strong>
-                      <span className="text-slate-400">Scans open tickets and redirects users to upvote active reports instead.</span>
+                      <strong className="block text-white font-bold mb-0.5">{lang === 'ur' ? 'ڈپلیکیٹ رپورٹ کی نشاندہی' : 'Duplicate Warning'}</strong>
+                      <span className="text-slate-400">{lang === 'ur' ? 'اوپن ٹکٹس کا جائزہ لے کر صارفین کو پہلے سے موجود شکایت پر اپ ووٹ کرنے کا کہتا ہے۔' : 'Scans open tickets and redirects users to upvote active reports instead.'}</span>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3 bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
                     <TrendingUp className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
                     <div className="text-xs">
-                      <strong className="block text-white font-bold mb-0.5">Admin Trend Synthesis</strong>
-                      <span className="text-slate-400">Aggregates repeat failures across campus buildings for preventative maintenance.</span>
+                      <strong className="block text-white font-bold mb-0.5">{lang === 'ur' ? 'انتظامی تجزیات و رجحانات' : 'Admin Trend Synthesis'}</strong>
+                      <span className="text-slate-400">{lang === 'ur' ? 'بار بار پیدا ہونے والی خرابیوں کا پیشگی تجزیہ فراہم کرتا ہے۔' : 'Aggregates repeat failures across campus buildings for preventative maintenance.'}</span>
                     </div>
                   </div>
                 </div>
@@ -564,8 +566,8 @@ export default async function HomePage() {
                         <Bot className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-white">CampusFix Assistant</div>
-                        <div className="text-[10px] text-teal-400">Online • Ready to Assist</div>
+                        <div className="text-xs font-bold text-white">{lang === 'ur' ? 'کیمپس فکس اسسٹنٹ' : 'CampusFix Assistant'}</div>
+                        <div className="text-[10px] text-teal-400">{lang === 'ur' ? 'آن لائن • مدد کے لیے تیار' : 'Online • Ready to Assist'}</div>
                       </div>
                     </div>
                     <span className="text-[10px] font-mono text-slate-500">v2.4 AI</span>
@@ -573,22 +575,24 @@ export default async function HomePage() {
 
                   {/* AI Bubble 1: User prompt */}
                   <div className="bg-slate-800/80 text-slate-200 text-xs p-3 rounded-xl rounded-br-none ml-6 border border-slate-700/50">
-                    "The water fountain near Room 204 in Engineering Hall is leaking onto the carpet."
+                    {lang === 'ur'
+                      ? '"انجینئرنگ ہال کے کمرہ 204 کے قریب واٹر کولر کا پانی قالین پر بہہ رہا ہے۔"'
+                      : '"The water fountain near Room 204 in Engineering Hall is leaking onto the carpet."'}
                   </div>
 
                   {/* AI Bubble 2: Assistant response */}
                   <div className="bg-teal-950/60 text-teal-200 text-xs p-3.5 rounded-xl rounded-tl-none mr-4 border border-teal-800/50 space-y-2">
                     <p className="font-semibold text-white">
-                      Identified: Plumbing Issue in Engineering Hall
+                      {lang === 'ur' ? 'شناخت: انجینئرنگ ہال میں پلمبنگ کا مسئلہ' : 'Identified: Plumbing Issue in Engineering Hall'}
                     </p>
                     <ul className="text-[11px] space-y-1 text-teal-300">
-                      <li>• Category set to: <strong>Plumbing</strong></li>
-                      <li>• Urgency: <strong>High</strong> (Water hazard near carpet/power)</li>
-                      <li>• No identical active reports found within 50 ft.</li>
+                      <li>• {lang === 'ur' ? 'کیٹیگری: پلمبنگ' : 'Category set to: Plumbing'}</li>
+                      <li>• {lang === 'ur' ? 'ترجیح: ہائی (پانی اور بجلی کا خطرہ)' : 'Urgency: High (Water hazard near carpet/power)'}</li>
+                      <li>• {lang === 'ur' ? 'قریبی 50 فٹ میں کوئی دوسری ڈپلیکیٹ رپورٹ نہیں ہے۔' : 'No identical active reports found within 50 ft.'}</li>
                     </ul>
                     <div className="pt-1 flex items-center gap-1.5 text-[10px] text-teal-400 font-bold">
                       <Check className="w-3.5 h-3.5" />
-                      Ticket ready for instant 1-click submission
+                      {lang === 'ur' ? 'شکایت 1-کلک پر جمع کروانے کے لیے تیار' : 'Ticket ready for instant 1-click submission'}
                     </div>
                   </div>
                 </div>
